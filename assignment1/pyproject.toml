@@ -1,0 +1,29 @@
+[project]
+name = "assignment1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "OneNok_HK", email = "honokhei20061122@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "cis341-lib",
+]
+
+[tool.uv.sources]
+cis341-lib = { path = "../cis341_lib", editable = true }
+
+[tool.ruff.lint]
+# 啟用 DOC (pydoclint 規則) 與 D (pydocstyle 規則，用以檢查傳統 docstring 格式)
+select = ["D", "DOC"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"  # 確保傳統 docstring 檢查符合 NumPy 標準
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
