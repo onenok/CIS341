@@ -1,0 +1,19 @@
+{
+  "class_order": [
+    "sunny",
+    "overcast",
+    "rainy",
+    "snowy",
+    "foggy",
+    "lightning"
+  ],
+  "preprocess": {
+    "mobilenet_v2": {
+      "image_size": [
+        224,
+        224
+      ],
+      "scaling": "float32, mobilenet_v2.preprocess_input -> [-1, 1]"
+    }
+  }
+}

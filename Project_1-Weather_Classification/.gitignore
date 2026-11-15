@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.keras
+*.h5
+
+videos/
+
+# HuggingFace / CLIP 模型快取
+.cache/
+
+# 複核用接觸印樣與 CLIP 中間產物（大檔，不需進版控）
+datasets/*
+!datasets/hand-filtered
+!datasets/metadata
+tools/

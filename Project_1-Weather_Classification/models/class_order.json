@@ -1,0 +1,30 @@
+{
+  "class_order": [
+    "sunny",
+    "overcast",
+    "rainy",
+    "snowy"
+  ],
+  "label_to_id": {
+    "sunny": 0,
+    "overcast": 1,
+    "rainy": 2,
+    "snowy": 3
+  },
+  "preprocess": {
+    "scratch": {
+      "image_size": [
+        128,
+        128
+      ],
+      "scaling": "float32, divided by 255 -> [0, 1]"
+    },
+    "mobilenet_v2": {
+      "image_size": [
+        224,
+        224
+      ],
+      "scaling": "float32, mobilenet_v2.preprocess_input -> [-1, 1]"
+    }
+  }
+}

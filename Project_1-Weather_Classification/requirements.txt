@@ -1,0 +1,40 @@
+# CIS341 Project 1 - Weather Classification
+# Python 3.12
+# 安裝：uv pip install -r requirements.txt
+# 或：  .venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# --- 深度學習 ---
+# TensorFlow 2.16 在 Windows 上要求 numpy<2，故 numpy 固定為 1.26.x
+tensorflow==2.16.1
+keras==3.1.1
+
+# PyTorch（CUDA 13.2 wheel，GTX 1650 / sm_75 可用）
+# 安裝時需讓 uv 自動挑 CUDA 版本：
+#   uv pip install torch torchvision --torch-backend=auto
+# 若直接 pip install -r 會裝到 PyPI 的 CPU-only 版本
+torch==2.15.0+cu132
+torchvision==0.29.2+cu132
+
+# --- 資料處理與影像 ---
+numpy==1.26.4
+pandas==2.2.3
+opencv-python==4.10.0.84
+pillow==10.4.0
+
+# --- 視覺化 ---
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# --- 評估 ---
+scikit-learn==1.5.2
+
+# --- 介面 ---
+gradio==6.30.0
+
+# --- Notebook ---
+jupyterlab==4.2.5
+ipykernel==6.29.5
+
+# --- 資料篩選（CLIP zero-shot）---
+# CLIP 只需 transformers，不強制 PyTorch 以外的前端
+transformers==5.22.2

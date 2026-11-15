@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>CIS341 Project 1 — 交付內容完整說明</title>
+<style>
+  :root{
+    --bg:#fbfbfd; --fg:#1c1f26; --muted:#5b6472; --line:#e2e6ee;
+    --code-bg:#f4f6fa; --accent:#2f6fed; --warn:#b45309; --warn-bg:#fff8ed;
+    --bad:#b91c1c; --bad-bg:#fef4f4; --ok:#0f7a4d; --ok-bg:#f1faf5;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.75 -apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:48px 28px 96px}
+  h1{font-size:1.9rem;line-height:1.3;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 40px}
+  h2{
+    font-size:1.3rem;margin:56px 0 16px;padding-bottom:8px;
+    border-bottom:2px solid var(--line);letter-spacing:-.01em;
+  }
+  h3{font-size:1.05rem;margin:30px 0 10px}
+  h4{font-size:.95rem;margin:20px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  p,li{margin:8px 0}
+  code{
+    font:.87em/1.5 "Cascadia Code",Consolas,monospace;background:var(--code-bg);
+    padding:1px 6px;border-radius:4px;border:1px solid var(--line);
+  }
+  pre{
+    background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+    padding:14px 16px;overflow-x:auto;font:.83rem/1.6 "Cascadia Code",Consolas,monospace;
+  }
+  pre code{background:none;border:none;padding:0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:.9rem}
+  th,td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  th{background:#eff2f8;font-weight:600;white-space:nowrap}
+  tbody tr:nth-child(even){background:#fafbfe}
+  .num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  .box{border-radius:8px;padding:14px 18px;margin:16px 0;border:1px solid;font-size:.93rem}
+  .warn{background:var(--warn-bg);border-color:#f0d9b5;color:#6b4410}
+  .bad{background:var(--bad-bg);border-color:#f3c9c9;color:#7f1d1d}
+  .ok{background:var(--ok-bg);border-color:#bfe3d0;color:#0b5137}
+  .box strong{display:block;margin-bottom:4px;font-size:.95rem}
+  .muted{color:var(--muted)}
+  .tag{
+    display:inline-block;font-size:.72rem;font-weight:600;padding:1px 8px;
+    border-radius:20px;vertical-align:middle;margin-left:6px;
+  }
+  .t-done{background:#dcf5e7;color:#0b5137}
+  .t-pend{background:#fdecc8;color:#7c4a03}
+  .t-bad{background:#fbdcdc;color:#7f1d1d}
+  ul{padding-left:22px}
+  ol{padding-left:22px}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 24px;margin:28px 0}
+  .toc ol{margin:0;columns:2;column-gap:36px}
+  .toc a{color:var(--accent);text-decoration:none}
+  .toc a:hover{text-decoration:underline}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
+  .card{background:#fff;border:1px solid var(--line);border-radius:9px;padding:14px 16px}
+  .card .k{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .card .v{font-size:1.35rem;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
+  hr{border:none;border-top:1px solid var(--line);margin:40px 0}
+  .small{font-size:.85rem}
+  details{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 16px;margin:12px 0}
+  summary{cursor:pointer;font-weight:600;font-size:.92rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>CIS341 Project 1 — 你要交出去的到底是什麼</h1>
+<p class="sub">Weather Classification ｜ 學生 S26202765 ｜ 截止 2026-11-15 23:59 ｜ 本文件由實際程式碼與已存檔輸出產生，非憑記憶撰寫</p>
+
+<div class="toc">
+<strong>目錄</strong>
+<ol>
+  <li><a href="#deliver">一、交付清單（硬碟上實際存在的東西）</a></li>
+  <li><a href="#lib">二、weather_lib.py 逐段解剖</a></li>
+  <li><a href="#nb">三、project1.ipynb 逐節解剖</a></li>
+  <li><a href="#numbers">四、真實執行結果總表</a></li>
+  <li><a href="#weak">五、這份作業的誠實弱點</a></li>
+  <li><a href="#todo">六、notebook 裡還沒填的東西</a></li>
+  <li><a href="#gap">七、資料集缺口</a></li>
+  <li><a href="#check">八、交件前檢查清單</a></li>
+</ol>
+</div>
+
+<h2 id="deliver">一、交付清單（硬碟上實際存在的東西）</h2>
+
+<div class="grid">
+  <div class="card"><div class="k">notebook</div><div class="v">82 cells</div><div class="small muted">40 個 code cell，全部已執行</div></div>
+  <div class="card"><div class="k">weather_lib.py</div><div class="v">835 行</div><div class="small muted">37 個函式 / 類別</div></div>
+  <div class="card"><div class="k">訓練好的模型</div><div class="v">3 個</div><div class="small muted">.keras 格式</div></div>
+  <div class="card"><div class="k">標註影片</div><div class="v">3 支</div><div class="small muted">共約 56 MB</div></div>
+</div>
+
+<table>
+<thead><tr><th>路徑</th><th>大小</th><th>角色</th></tr></thead>
+<tbody>
+<tr><td><code>project1.ipynb</code></td><td class="num">3.85 MB</td><td><strong>主要交付物</strong>。10 張圖表已嵌入，評分老師不需重跑就看得到結果</td></tr>
+<tr><td><code>weather_lib.py</code></td><td class="num">835 行</td><td><strong>共用程式庫</strong>。notebook 靠 <code>import weather_lib as W</code> 使用</td></tr>
+<tr><td><code>models/scratch_cnn.keras</code></td><td class="num">3.04 MB</td><td>從零訓練的 CNN（含增強版）</td></tr>
+<tr><td><code>models/scratch_cnn_noaug.keras</code></td><td class="num">3.04 MB</td><td>6.4 節對照實驗用的「關掉增強」版本</td></tr>
+<tr><td><code>models/mobilenet_v2.keras</code></td><td class="num">9.20 MB</td><td>遷移學習模型，<strong>這是實際部署的那一個</strong></td></tr>
+<tr><td><code>models/class_order.json</code></td><td class="num">—</td><td>類別順序契約（sunny / overcast / rainy / snowy ↔ 0–3）</td></tr>
+<tr><td><code>models/deployment_choice.json</code></td><td class="num">—</td><td>為什麼選 mobilenet_v2 的書面理由與比較表</td></tr>
+<tr><td><code>Reports/main-weather-annotated.mp4</code></td><td class="num">20.75 MB</td><td>主要天氣影片的標註輸出</td></tr>
+<tr><td><code>Reports/changing-weather-annotated.mp4</code></td><td class="num">14.93 MB</td><td>天氣變化影片的標註輸出</td></tr>
+<tr><td><code>Reports/gradio-annotated.mp4</code></td><td class="num">20.75 MB</td><td>Gradio 介面實際跑出來的輸出（回應用同一支影片覆寫）</td></tr>
+<tr><td><code>datasets/metadata/image_index.csv</code></td><td class="num">741 列</td><td>每張圖的路徑、類別、md5、接近重複群組編號</td></tr>
+<tr><td><code>datasets/metadata/sources.csv</code></td><td class="num">19 列</td><td>來源與授權表 <span class="tag t-pend">未填</span></td></tr>
+<tr><td><code>datasets/splits/four_class_split.csv</code></td><td class="num">657 列</td><td>訓練／驗證分割結果，可用來驗證可重現性</td></tr>
+<tr><td><code>videos/</code></td><td class="num">4 支</td><td>輸入影片（main / change 各一支會被用到）</td></tr>
+</tbody>
+</table>
+
+<div class="box ok">
+<strong>最重要的一點</strong>
+老師打開 <code>project1.ipynb</code> 就能看到全部 40 個 cell 的執行輸出（<code>execution_count</code> 1→40 連續、0 個 error、10 張 PNG 內嵌），不需要重跑、不需要有你的資料集。這是這次特別處理過的。
+</div>
+
+<h2 id="lib">二、weather_lib.py 逐段解剖</h2>
+
+<p>這個檔案的定位是「把重複的、無聊的、跟評分無關的邏輯搬出去」，讓 notebook 只留下評分表要看得到的東西（模型定義、訓練呼叫、圖表、評估）。</p>
+
+<h3>2.0 開頭的三個設計決定</h3>
+<pre><code>"""Shared helpers for the CIS341 Project 1 weather-classification notebook.
+* Nothing here touches the network at import time, so the notebook stays usable
+  while the dataset is still being collected.
+* Functions raise a short `DataNotReady` error (or print a hint) instead of a
+  bare traceback when a class folder is missing...
+"""</code></pre>
+<p>這三句話是整個專案的核心約束：你的資料集是分好幾天慢慢補的，所以<strong>任何函式都不能因為少一個類別就整個爆掉</strong>。這就是為什麼後面你會一直看到 <code>[note] no images yet for: snowy</code> 這種訊息而不是 traceback。</p>
+
+<h3>2.1 常數區（L30–L53）</h3>
+<table>
+<thead><tr><th>常數</th><th>值</th><th>為什麼重要</th></tr></thead>
+<tbody>
+<tr><td><code>ROOT</code></td><td><code>...\Project_1-Weather_Classification</code></td><td>絕對路徑，notebook 在哪跑都一樣</td></tr>
+<tr><td><code>DATA_ROOT</code></td><td><code>datasets/hand-filtered</code></td><td><strong>不是</strong> <code>datasets</code>！只放你人工篩過的四個類別資料夾</td></tr>
+<tr><td><code>CLASS_ORDER</code></td><td><code>["sunny","overcast","rainy","snowy"]</code></td><td><strong>類別順序契約</strong>。模型的 index 0–3、Gradio 的顯示順序、標註影片的顏色全部靠這個對齊</td></tr>
+<tr><td><code>EXTRA_CLASSES</code></td><td><code>["foggy","lightning"]</code></td><td>六類延伸用的兩個額外類別</td></tr>
+<tr><td><code>CLASS_MEANING</code></td><td>6 條英文定義</td><td>每一類「算什麼、不算什麼」的書面標準，直接對應評分表要求</td></tr>
+</tbody>
+</table>
+
+<h3>2.2 掃描與計數</h3>
+<table>
+<thead><tr><th>函式</th><th>做什麼</th></tr></thead>
+<tbody>
+<tr><td><code>list_images(label)</code></td><td>列出某類資料夾裡所有圖檔（副檔名白名單 <code>.jpg/.jpeg/.png/.bmp/.webp</code>）</td></tr>
+<tr><td><code>scan_counts(labels, index)</code></td><td>每類的張數。<strong>關鍵設計</strong>：傳入 <code>index</code> 才算得出「去重後的 distinct 張數」，沒傳就只能算原始檔數。<br>評分表要求「每類 ≥250 張 distinct 原圖」，所以 <code>meets_250</code> 這欄是<strong>看去重後的數字</strong>，不是看檔案數</td></tr>
+<tr><td><code>counts_table(index)</code></td><td>把上面整理成報告用的表：raw / distinct / duplicates / meets_250，外加一列 TOTAL</td></tr>
+</tbody>
+</table>
+<div class="box warn">
+<strong>為什麼要分「原始檔數」和「distinct」</strong>
+你手動篩的時候同一個場景可能存了兩三張，或是同一張圖在不同網路來源重複下載。檔案件數會騙人 —— 252 張 sunny 裡實際上只有 219 張是真的不同的照片。評分表寫的是 250 張<em>不同的</em>原圖，所以必須用 distinct 算。
+</div>
+
+<h3>2.3 接近重複偵測（L134–L269）</h3>
+<p>這裡用了三種指紋，缺一不可：</p>
+<table>
+<thead><tr><th>函式</th><th>原理</th><th>抓得到什麼</th></tr></thead>
+<tbody>
+<tr><td><code>_md5()</code></td><td>檔案位元組的雜湊</td><td><strong>完全相同</strong>的檔案（同一張圖下載兩次）</td></tr>
+<tr><td><code>_ahash()</code></td><td>縮成 8×8 灰階，記每個像素比平均值亮還是暗（64 bit）</td><td>整體亮度／色彩分佈相近 → 抓「同一張圖被重新壓縮或縮放」</td></tr>
+<tr><td><code>_dhash()</code></td><td>縮成 9×8 灰階，記每個像素「比右邊鄰居亮還是暗」（64 bit）</td><td>左右漸層結構 → 抓「同一場景、不同曝光」</td></tr>
+</tbody>
+</table>
+
+<div class="box warn">
+<strong>為什麼 aHash 和 dHash 必須「同時」滿足才算重複</strong>
+這是本專案最重要的一個防錯設計。只靠 aHash 的話，<strong>所有「整片平坦灰天」的照片會被判定成同一張</strong> —— 因為它們都是上半部亮、下半部暗，8×8 平均值一比就全中。那會把 overcast 這個類別直接吃掉九成。
+<br><br>
+所以 <code>build_index()</code> 的規則是：md5 完全相同 <strong>或</strong>（aHash 差距 ≤ 6 bit <strong>且</strong> dHash 差距 ≤ 6 bit）才算同一群。dHash 帶有「左到右的結構」，平坦天空的照片在結構上其實各不相同（雲的分佈位置不同），所以不會被誤併。
+</div>
+
+<p><code>hash_all()</code> 還有一層 <strong>mtime 快取</strong>：每張圖的指紋存在 <code>datasets/review-sheets/cache/image_hashes.json</code>，只要檔案的修改時間沒變就直接用快取。你每次重跑 notebook 不會重新算 741 張圖的雜湊。</p>
+
+<h3>2.4 去重與分割（L278–L357）</h3>
+<table>
+<thead><tr><th>函式</th><th>做什麼</th><th>為什麼這樣做</th></tr></thead>
+<tbody>
+<tr><td><code>duplicate_summary()</code></td><td>統計：md5 完全相同幾張、接近重複幾組、跨類別幾組、去重後剩幾張</td><td>報告 2.4 節的表格來源</td></tr>
+<tr><td><code>cross_label_groups()</code></td><td>找出「同一張圖被歸到兩個不同類別」</td><td>這是<strong>真正的標註錯誤</strong>，必須人工修。目前結果是 0 組</td></tr>
+<tr><td><code>dedupe(index)</code></td><td><strong>每個接近重複群組只留一張</strong>（留檔案最大的那張，通常畫質最好）</td><td>只在 DataFrame 上過濾，<strong>不刪硬碟檔案</strong></td></tr>
+<tr><td><code>make_split(index)</code></td><td>分層抽樣 + <strong>群組感知</strong>：整個重複群組一定全部落在同一邊</td><td><strong>這是防資料洩漏的關鍵</strong>。如果同一張圖的兩個版本一張在 train、一張在 val，驗證分數就是假的</td></tr>
+</tbody>
+</table>
+
+<div class="box bad">
+<strong>評分最容易被抓的地方在這裡</strong>
+如果沒有群組感知分割，741 張圖裡有 84 張是副本，隨機切的話幾乎保證會有副本跨到驗證集。模型在驗證集上「看到」訓練時看過的圖，分數會虛高。<br><br>
+<code>make_split()</code> 先把每群指派到 train 或 val，再在群組層級做分層抽樣。<strong>實測結果：跨 train/val 的重複群組 = 0</strong>。這個數字 notebook 3.1 節有印出來，可以直接給老師看。
+</div>
+
+<h3>2.5 前處理契約（L360–L419）</h3>
+<pre><code>@dataclass(frozen=True)
+class PreprocessSpec:
+    name: str
+    image_size: tuple[int, int]
+    scale: str          # 人類可讀的說明
+    fn: Callable[[Any], Any]   # 實際的縮放函式
+    note: str</code></pre>
+<p><code>spec_for("scratch")</code> → 128×128、除以 255 → [0,1]<br>
+<code>spec_for("mobilenet_v2")</code> → 224×224、<code>mobilenet_v2.preprocess_input</code> → [-1,1]</p>
+<div class="box warn">
+<strong>為什麼要特別寫一個 dataclass 來管這件事</strong>
+兩個模型的前處理<strong>不一樣</strong>，而且錯了不會報錯、只會讓準確率悄悄掉。<br>
+· scratch CNN 把 <code>/255</code> 寫成模型內的 <code>Rescaling</code> 層 → 存的模型自帶前處理<br>
+· MobileNetV2 的 backbone <strong>不包含</strong>縮放 → 必須在外面呼叫 <code>preprocess_input</code><br>
+· EfficientNet <strong>內部</strong>就會縮放 → 如果再手動除以 255 就是縮放兩次，直接毀掉<br><br>
+notebook 3.3 節有實測證明：同一個像素值 128，scratch 得到 0.502，mobilenet_v2 得到 0.004 —— 差別巨大。這個 <code>PreprocessSpec</code> 就是保證「訓練、驗證、Gradio 推論、影片推論」四處用的是同一套規則。
+</div>
+
+<h3>2.6 資料管線與增強（L479–L583）</h3>
+<table>
+<thead><tr><th>函式</th><th>做什麼</th></tr></thead>
+<tbody>
+<tr><td><code>make_dataset()</code></td><td>把 DataFrame 變成 <code>tf.data</code> 管線：讀檔 → 解碼 → 縮放 → <code>cast float32</code> → 選擇性增強 → batching</td></tr>
+<tr><td><code>make_augmenter()</code></td><td>六種增強：水平翻轉、旋轉 ±0.15、縮放 ±10%、亮度 ±0.12、對比 0.15、飽和度 0.85–1.15</td></tr>
+<tr><td><code>sample_per_class()</code></td><td>每類固定抽 N 張（保證預覽圖涵蓋<strong>每一類</strong>）</td></tr>
+<tr><td><code>augment_preview()</code></td><td>回傳「原圖 + 多次獨立增強結果」，用來說明增強是隨機的</td></tr>
+</tbody>
+</table>
+
+<h4>刻意不用的增強</h4>
+<table>
+<thead><tr><th>不用的方法</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>垂直翻轉</td><td>會產生「天空在地上」的圖，現實不存在</td></tr>
+<tr><td>色相旋轉</td><td>藍天不能被轉成綠天或雨天</td></tr>
+<tr><td>激進隨機裁切</td><td>雨絲和雪塊是細微特徵，裁掉就沒了</td></tr>
+<tr><td>Cutout / 擦除</td><td>黑方塊看起來像天空破洞，會教模型錯的東西</td></tr>
+</tbody>
+</table>
+
+<h3>2.7 評估與影片（L585–L782）</h3>
+<table>
+<thead><tr><th>函式</th><th>做什麼</th></tr></thead>
+<tbody>
+<tr><td><code>evaluate_model()</code></td><td>回傳 accuracy、per-class report、confusion matrix、<strong>y_true / y_pred / y_prob 原始陣列</strong>（後面 6.4 節要靠這些算 macro F1 和「錯得多有自信」）</td></tr>
+<tr><td><code>confusion_table()</code></td><td>把 confusion matrix 排成「true × pred」的表格，附 row_total</td></tr>
+<tr><td><code>video_info()</code></td><td>讀 fps、總幀數、秒數、解析度</td></tr>
+<tr><td><code>sample_frames()</code></td><td>按時間間隔抽幀，回傳 (時間戳, RGB 陣列) 清單</td></tr>
+<tr><td><code>predict_frames()</code></td><td>逐幀推論，回傳機率矩陣與時間戳</td></tr>
+<tr><td><code>mean_scores()</code></td><td><strong>評分表要求</strong>：整支影片的「各類別平均機率」</td></tr>
+<tr><td><code>dominant_from_mean()</code></td><td>平均機率最大的那一類 = 主要天氣</td></tr>
+<tr><td><code>annotate_video()</code></td><td>把每幀的預測畫在影片上（左上角文字 + 顏色條），輸出成新 mp4</td></tr>
+</tbody>
+</table>
+
+<div class="box ok">
+<strong>評分表的三個影片要求，對應到哪裡</strong>
+① 「至少每秒取樣一次」→ <code>sample_frames(every_seconds=1.0)</code><br>
+② 「報告平均機率向量」→ <code>mean_scores()</code>，notebook 印出四類平均百分比<br>
+③ 「變化偵測 1 ≤ N ≤ 5 幀」→ 8.4 節的 <code>MAX_GAP_FRAMES = 5</code> 加上 callback 內的區間檢查（實測 0 和 6 都會被 <code>gr.Error</code> 擋掉）
+</div>
+
+<h3>2.8 工具函式（L783–L821）</h3>
+<p><code>ensure_dirs()</code> 建目錄、<code>save_json()</code>/<code>load_json()</code>、<code>human_time()</code>、<code>bits_of_training()</code>（比較兩個 Keras History 的關鍵指標）。</p>
+
+<h2 id="nb">三、project1.ipynb 逐節解剖</h2>
+<p>82 個 cell＝22 個 markdown 標題／說明 + <strong>40 個 code cell</strong>（<code>execution_count</code> 1–40）。以下每節都標「這一節在滿足評分表的哪一條」。</p>
+
+<h3>§1 程式庫匯入與設定 <span class="tag t-done">已執行</span></h3>
+<table>
+<tbody>
+<tr><td><code>4e3f9b90</code>（ec=1）</td><td>匯入、固定 <code>SEED=341</code>、印出套件版本、<code>set_random_seed</code>、路徑加入 <code>sys.path</code>、建立 <code>require()</code> 閘門</td></tr>
+<tr><td><code>ai-usage-disclosure</code>（MD）</td><td><strong>AI 使用揭露表</strong>（7 個面向逐項說明用了什麼、你自己做了什麼）</td></tr>
+</tbody>
+</table>
+<p><code>require(classes, need)</code> 是自訂的守門函式：只要「至少 <code>need</code> 個類別有圖」就回傳 <code>True</code> 讓 cell 繼續跑，並把缺的類別印出來。<strong>這就是為什麼 snowy 是 0 張但整個 notebook 還能跑完。</strong></p>
+
+<h3>§2 資料收集 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>實際輸出</th></tr></thead>
+<tbody>
+<tr><td>2.0 <code>5d287f9e</code></td><td>四個類別資料夾存在嗎？各有幾張？</td><td>sunny 252 / overcast 202 / rainy 287 / <strong>snowy 0（資料夾不存在）</strong>，<code>everything present: False</code></td></tr>
+<tr><td>2.1 <code>e71b95d0</code></td><td>每類的 include / exclude 清單 + <strong>歧義處理政策</strong></td><td>例：sunny vs overcast「由陽光是否照到地面決定，不是看還剩多少藍天」</td></tr>
+<tr><td>2.2 <code>5bd578b3</code></td><td>來源與授權表，從 <code>sources.csv</code> 讀</td><td>19 個資料夾、磁碟上共 8622 張原始圖；<strong>19 列全部待填 url/licence</strong></td></tr>
+<tr><td>2.3 <code>9308e9c5</code></td><td>各類原始張數長條圖</td><td>如實標明這是「到貨張數」，去重後才算 250 門檻</td></tr>
+<tr><td>2.4 <code>8004e37b</code></td><td>重複統計 + 保留／剔除範例縮圖</td><td>md5 完全相同 14 張、接近重複 141 組、跨類別 <strong>0 組</strong>、去重後 727 張</td></tr>
+</tbody>
+</table>
+
+<h3>§3 資料準備 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>實際輸出</th></tr></thead>
+<tbody>
+<tr><td>3.0 <code>5946e484</code></td><td>建索引 + 去重 + <strong>250 門檻檢查表</strong></td><td>741 → 657 張 distinct。sunny 219 <span class="tag t-bad">不足</span>、overcast 181 <span class="tag t-bad">不足</span>、rainy 257 <span class="tag t-done">達標</span></td></tr>
+<tr><td>3.1 <code>9ea1d49d</code></td><td>群組感知分層分割</td><td>train 526 / val 131。<strong>跨 train/val 的重複群組 = 0</strong></td></tr>
+<tr><td>3.2 <code>4e94a334</code></td><td><code>tf.data</code> 載入器 + 一個 batch 的預覽圖</td><td>shape <code>(32,128,128,3)</code>、dtype float32、範圍 0–1</td></tr>
+<tr><td>3.3 <code>89e67742</code></td><td>兩個模型的前處理對照</td><td>同一個像素 128 → scratch 得 0.502、mobilenet_v2 得 0.004</td></tr>
+<tr><td>3.4 <code>4596a032</code></td><td>類別順序寫成 JSON 契約 + 檢查資料裡有沒有未知標籤</td><td><code>class_order.json</code>、<code>unknown labels: none</code></td></tr>
+</tbody>
+</table>
+
+<h3>§4 資料增強 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>實際輸出</th></tr></thead>
+<tbody>
+<tr><td>4.1 <code>167086a5</code> / <code>e93a5a72</code></td><td>用了哪六種增強、各自對應什麼現實變化；<strong>以及刻意不用哪四種、為什麼</strong></td><td>見上面 2.6 節的兩個表</td></tr>
+<tr><td>4.2 <code>5f587160</code></td><td><strong>每類至少一張 × 3 列</strong>（原圖 + 兩次獨立增強）</td><td>3 類 × 3 列 = 9 宮格；<code>two draws differ: True</code></td></tr>
+<tr><td>4.3 <code>dc69261d</code></td><td>證明增強真的在管線裡，而非只是畫圖</td><td>平均像素 0.4082 → 0.3928；驗證集<strong>沒有</strong>增強；每個 epoch 的 batch 都不同</td></tr>
+</tbody>
+</table>
+<div class="box warn">
+<strong>4.2 節為什麼要「每類至少一張」</strong>
+評分表明確要求增強預覽必須涵蓋<strong>每一個類別</strong>，漏掉一類就失分。原本的寫法是「隨機抽 3 張」，實測 3 個類別時有 25.8% 機率漏掉某一類、4 個類別時高達 62.0%。現在改成「每類先各抽一張，不足再補」，並用 <code>assert</code> 擔保。
+</div>
+
+<h3>§5 模型設計 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>模型</th><th>參數量</th></tr></thead>
+<tbody>
+<tr><td>5.1 <code>170d8780</code></td><td><strong>scratch CNN</strong>：4 組 Conv2D+BN+Pool → GlobalAvgPool → Dense</td><td>總 259,268 / <strong>可訓練 258,564（99.7%）</strong></td></tr>
+<tr><td>5.2 <code>63028850</code></td><td><strong>MobileNetV2 遷移學習</strong>：凍結 backbone + 新分類頭</td><td>總 2,263,108 / <strong>可訓練 5,124（0.2%）</strong></td></tr>
+<tr><td>5.3 <code>7958a5d3</code></td><td>並列比較 + 完整 <code>summary()</code></td><td>兩者相差 8.7 倍參數量，但可訓練參數相差 50 倍</td></tr>
+</tbody>
+</table>
+
+<h3>§6 模型訓練與分析 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>實際輸出</th></tr></thead>
+<tbody>
+<tr><td>6.1 <code>5ef9dfee</code></td><td>訓練設定集中在一個 dict</td><td>seed 341、batch 32、scratch 40 epoch / transfer 20 epoch、Adam 1e-3、early stopping patience 6</td></tr>
+<tr><td>6.2 <code>b88c1a3c</code></td><td>兩個模型都訓練，History 存起來</td><td>scratch 實際跑 7 epoch 就早停（best epoch 1）</td></tr>
+<tr><td>6.3 <code>efc019e3</code></td><td>訓練／驗證曲線</td><td>2 張圖</td></tr>
+<tr><td>6.4 <code>bf7f0d15</code></td><td><strong>控制變因調查</strong>（評分表要求「觀察→改變→重測」）</td><td>見下方專節</td></tr>
+<tr><td>6.5 <code>c509980c</code></td><td>兩個模型在<strong>同一份未增強驗證集</strong>上評估</td><td>見下方</td></tr>
+<tr><td>6.6 <code>00b64b02</code></td><td>比較表 + 部署選擇 + 理由</td><td>選 <code>mobilenet_v2</code>，val accuracy 0.5954</td></tr>
+</tbody>
+</table>
+
+<h4>6.4 節到底做了什麼（這節是評分重點）</h4>
+<ol>
+<li><strong>觀察</strong>：訓練曲線上 train accuracy 一直漲（0.743 → 0.943），但 validation loss 從第 2 epoch 起就不再改善（1.368 → 2.510）→ 兩條曲線明顯分開</li>
+<li><strong>改變一個因子</strong>：只關掉增強，其餘全部固定（分割、seed、架構、優化器、學習率、batch size、epoch 預算、callbacks、驗證集）</li>
+<li><strong>重測</strong>：兩個變體在<strong>完全相同的驗證圖片</strong>上評分</li>
+</ol>
+<table>
+<thead><tr><th>變體</th><th class="num">train acc</th><th class="num">val acc</th><th class="num">val loss</th><th class="num">過擬合差距</th></tr></thead>
+<tbody>
+<tr><td>有增強</td><td class="num">0.899</td><td class="num">0.275</td><td class="num">2.281</td><td class="num">+0.624</td></tr>
+<tr><td>關掉增強</td><td class="num">0.943</td><td class="num">0.275</td><td class="num">2.510</td><td class="num">+0.668</td></tr>
+</tbody>
+</table>
+<p>macro F1 兩者都是 <strong>0.144</strong>；131 張驗證圖中錯了 95 張。</p>
+<div class="box warn">
+<strong>這一節記錄的是「量到了什麼」，不是「為什麼」</strong>
+關掉增強後訓練準確率更高（0.899 → 0.943）、過擬合差距更大（+0.624 → +0.668），
+但驗證準確率<strong>完全沒變</strong>（都是 0.275），macro F1 也一樣是 0.144，
+131 張驗證圖錯了 95 張。<br><br>
+這說明<strong>「有沒有開增強」不是這個差距的來源</strong> —— 這個否定性結論是
+穩固的，因為除了增強以外所有條件都固定住了。但差距的<strong>真正成因</strong>
+目前無法判定：訓練集只有 526 張且類別不均，資料量、類別分佈、模型容量都可能
+有份，現有數據分不開。<br><br>
+所以 notebook 的 6.4 只寫觀察與重測結果，<strong>刻意不下診斷</strong>。
+評分表要求的是「做一次受控調查」，這節把方法完整示範了，結論等資料齊全再寫。
+</div>
+
+<h3>§7 影像介面 Gradio <span class="tag t-done">程式已跑</span> <span class="tag t-pend">截圖待補</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th></tr></thead>
+<tbody>
+<tr><td>7.0 <code>3984bdb4</code></td><td><code>predict_image()</code> callback + <code>gr.Interface</code>（<code>gr.Image</code> → <code>gr.Label</code>）</td></tr>
+<tr><td>7.2 <code>4b2c9f10</code></td><td><strong>每類 × 每個來源的介面測試表</strong>，直接呼叫 callback 取得真實結果</td></tr>
+</tbody>
+</table>
+<p>7.2 的測試表實測輸出（9 筆）：</p>
+<pre><code>     source  expected           file predicted  probability  correct
+0     train  overcast    cloudy1.jpg     sunny        0.343    False
+1       val  overcast  cloudy118.jpg     sunny        0.364    False
+2     train     rainy      rain1.jpg     rainy        0.657     True
+3       val     rainy    rain100.jpg     rainy        0.530     True
+4     train     sunny    bdd_000.jpg     rainy        0.652    False
+...
+classes covered: 3 of 3 | sources: ['new data', 'train', 'val']
+accuracy on this small hand-picked set: 55.6%
+new-data check: 3 file(s) from rain/, exact copies already in the split: 0</code></pre>
+<div class="box ok">
+<strong>「新資料」是真的新資料</strong>
+用 <code>raw/weather-recognition/dataset/rain</code> 的圖當「模型沒看過的資料」，並<strong>當場用 md5 比對</strong>證明這 3 張跟訓練／驗證集裡沒有任何一張是同一份檔案（<code>exact copies: 0</code>）。這是自己加的證據，評分表沒要求但很有說服力。
+</div>
+
+<h3>§8 影片推論 <span class="tag t-done">已執行</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>實際輸出</th></tr></thead>
+<tbody>
+<tr><td>8.0 <code>7d3c732c</code></td><td>影片清單</td><td>4 支，main 用 <code>main-weather-sunny.mp4</code>（30fps/270幀/9秒），change 用 <code>video2.mp4</code>（24fps/192幀/8秒）</td></tr>
+<tr><td>8.1 <code>5cde0083</code></td><td>主要天氣：每秒取樣 → 平均機率 → 標註影片</td><td>9 個取樣點，平均 rainy 0.5405 / sunny 0.3544 / overcast 0.1049 / snowy 0.0002</td></tr>
+<tr><td>8.2 <code>7db1bea9</code></td><td>主要天氣 Gradio 介面</td><td>輸出標註影片 + 逐樣本表 + 平均分數 <code>gr.Label</code> + 摘要</td></tr>
+<tr><td>8.2b <code>8e1d40aa</code></td><td>介面煙霧測試</td><td>空輸入 → <code>gr.Error</code>；interval &lt; 1.0 → <code>gr.Error</code></td></tr>
+<tr><td>8.3 <code>af0c524e</code></td><td>天氣變化：每 5 幀取樣</td><td>39 個取樣點（0.208 秒間隔），全部 rainy，<strong>偵測到 0 次變化</strong></td></tr>
+<tr><td>8.4 <code>11bdfae9</code></td><td>變化 Gradio 介面</td><td>slider 1–5 幀，callback 再檢查一次</td></tr>
+<tr><td>8.4b <code>c3f5a7b1</code></td><td>介面煙霧測試</td><td>0 幀 → <code>gr.Error</code>、6 幀 → <code>gr.Error</code>、時間戳間距 0.21 秒符合預期</td></tr>
+</tbody>
+</table>
+<div class="box warn">
+<strong>兩個必須如實報告的觀察</strong>
+① 檔名是 <code>main-weather-sunny.mp4</code>，平均機率卻是 rainy 54.1%、sunny 35.4%。<br>
+② 天氣變化影片偵測到 <strong>0 次變化</strong>，39 個取樣點全部落在 rainy。<br><br>
+這兩個都是<strong>事實</strong>，notebook 沒有掩蓋，逐樣本機率與標註影片都留著。<br><br>
+<strong>但原因現在不能寫死</strong>。可能的來源至少有三個：資料集類別嚴重不均
+（只有 rainy 達標）、個別場景本身困難（弱光／低對比）、以及模型容量與訓練量
+不足；目前的實驗設計分不開這三者。因此 notebook 只記錄觀察與平均機率向量，
+<strong>解讀留到資料補齊、重新執行之後</strong>再依當時數字補寫。
+</div>
+
+<h3>§9 六類別延伸 <span class="tag t-pend">資料阻塞</span></h3>
+<table>
+<thead><tr><th>cell</th><th>內容</th><th>狀態</th></tr></thead>
+<tbody>
+<tr><td>9.0 <code>def78c00</code></td><td>為什麼選 foggy 和 lightning（可分性、混淆風險）</td><td><span class="tag t-done">已執行</span></td></tr>
+<tr><td>9.1 <code>765e6113</code></td><td>兩個新類別的 include / exclude 定義</td><td><span class="tag t-done">已執行</span>，但兩類各 0 張</td></tr>
+<tr><td>9.2 <code>c520b17a</code></td><td>六類資料 + 訓練</td><td><span class="tag t-pend">pending</span>：<code>need at least 6 non-empty classes, have 3</code></td></tr>
+<tr><td>9.3 <code>8b7e5081</code></td><td>六類結果比較</td><td><span class="tag t-pend">pending</span>：<code>section 9.2 has not run</code></td></tr>
+<tr><td>9.4 <code>six-class-interface</code></td><td>六類 Gradio 介面（六個分數 + 每類示範）</td><td><span class="tag t-pend">pending</span>：<code>section 9.2 has not run</code></td></tr>
+</tbody>
+</table>
+<div class="box warn">
+<strong>9.2 卡住不是程式問題</strong>
+<code>require(SIX, need=len(SIX))</code> 這道閘門要求「6 個類別全部非空」才放行。目前只有 3 類有圖，所以直接印 <code>[pending]</code> 就結束。<strong>閘門邏輯是正確的</strong> —— 它寧可停下來也不要拿 3 類去訓練一個標稱 6 類的模型。<br><br>
+只要補齊 snowy / foggy / lightning 的資料夾，這三個 cell 會自動開始跑，不需要改任何程式。
+</div>
+
+<h2 id="numbers">四、真實執行結果總表</h2>
+
+<h3>4.1 資料</h3>
+<table>
+<thead><tr><th>類別</th><th class="num">到貨張數</th><th class="num">distinct</th><th class="num">副本</th><th class="num">train</th><th class="num">val</th><th>250 門檻</th></tr></thead>
+<tbody>
+<tr><td>sunny</td><td class="num">252</td><td class="num">219</td><td class="num">33</td><td class="num">175</td><td class="num">44</td><td><span class="tag t-bad">缺 31</span></td></tr>
+<tr><td>overcast</td><td class="num">202</td><td class="num">181</td><td class="num">21</td><td class="num">145</td><td class="num">36</td><td><span class="tag t-bad">缺 69</span></td></tr>
+<tr><td>rainy</td><td class="num">287</td><td class="num">257</td><td class="num">30</td><td class="num">206</td><td class="num">51</td><td><span class="tag t-done">達標</span></td></tr>
+<tr><td>snowy</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td><span class="tag t-bad">無資料</span></td></tr>
+<tr><td><strong>TOTAL</strong></td><td class="num"><strong>741</strong></td><td class="num"><strong>657</strong></td><td class="num"><strong>84</strong></td><td class="num"><strong>526</strong></td><td class="num"><strong>131</strong></td><td>—</td></tr>
+</tbody>
+</table>
+<p class="small muted">跨 train/val 的重複群組：<strong>0</strong>｜跨類別的重複群組：<strong>0</strong>｜無法讀取的檔案：<strong>0</strong>｜驗證集比例：每類 19.8–20.1%</p>
+
+<h3>4.2 模型</h3>
+<table>
+<thead><tr><th>模型</th><th class="num">總參數</th><th class="num">可訓練</th><th class="num">val accuracy</th><th class="num">macro F1</th><th class="num">實際 epoch</th><th class="num">過擬合差距</th></tr></thead>
+<tbody>
+<tr><td>scratch_cnn</td><td class="num">259,268</td><td class="num">258,564 (99.7%)</td><td class="num">0.2748</td><td class="num">0.1437</td><td class="num">7（早停，best=1）</td><td class="num">+0.6244</td></tr>
+<tr><td><strong>mobilenet_v2</strong> ← 部署</td><td class="num">2,263,108</td><td class="num">5,124 (0.2%)</td><td class="num"><strong>0.5954</strong></td><td class="num"><strong>0.5536</strong></td><td class="num">20（best 19）</td><td class="num">−0.1087</td></tr>
+</tbody>
+</table>
+
+<h4>mobilenet_v2 的逐類表現</h4>
+<table>
+<thead><tr><th>類別</th><th class="num">precision</th><th class="num">recall</th><th class="num">f1</th><th class="num">support</th><th>觀察</th></tr></thead>
+<tbody>
+<tr><td>sunny</td><td class="num">0.610</td><td class="num">0.568</td><td class="num">0.588</td><td class="num">44</td><td>recall 0.568（25 / 44 張判對）</td></tr>
+<tr><td>overcast</td><td class="num">0.625</td><td class="num">0.278</td><td class="num">0.385</td><td class="num">36</td><td>recall 0.278（10 / 36 張判對）</td></tr>
+<tr><td>rainy</td><td class="num">0.581</td><td class="num"><strong>0.843</strong></td><td class="num"><strong>0.688</strong></td><td class="num">51</td><td>recall 0.843（43 / 51 張判對）</td></tr>
+<tr><td>snowy</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">0</td><td>沒有樣本，無法評估</td></tr>
+</tbody>
+</table>
+<div class="box warn">
+<strong>⚠️ 這張表目前只能用來確認「量測方式正確」，不能拿來評價模型</strong>
+上表的每一個數字都是真實執行輸出，逐類的 precision / recall / support 都可以用
+confusion matrix 反推核對，這部分沒有問題。<br><br>
+<strong>但現在還不能下結論</strong>。截至這次執行，只有 rainy 達到 250 張
+distinct 原圖的下限（257 張），sunny 219、overcast 181、snowy 0。在這種
+分佈下量出來的逐類指標，反映的是<strong>當前的資料快照</strong>，而不是模型
+或方法本身的好壞；任何「模型偏向某一類」「某個架構比較好」的說法，都要等
+資料補齊、重新執行之後才有意義。<br><br>
+因此 notebook 的 6.x 與 8.x 刻意只保留<strong>事實與機制驗證</strong>
+（曲線、混淆矩陣、同一份驗證集上的重測、平均機率向量），
+<strong>結果解讀留白</strong>，等資料齊全後依實際數字補寫。
+</div>
+
+<h3>4.3 影片</h3>
+<table>
+<thead><tr><th>任務</th><th>取樣</th><th class="num">樣本數</th><th>平均機率</th><th>結論</th></tr></thead>
+<tbody>
+<tr><td>主要天氣<br><code>main-weather-sunny.mp4</code></td><td>每 1.0 秒</td><td class="num">9</td><td>rainy 54.8% / sunny 34.6% / overcast 10.6% / snowy 0.02%</td><td class="bad" style="color:#7f1d1d">判成 rainy <span class="tag t-bad">與檔名矛盾</span></td></tr>
+<tr><td>天氣變化<br><code>video2.mp4</code></td><td>每 5 幀（0.208 秒）</td><td class="num">39</td><td>全部 rainy（0.63–0.81）</td><td class="bad" style="color:#7f1d1d">偵測到 0 次變化</td></tr>
+</tbody>
+</table>
+
+<h2 id="weak">五、這份作業的誠實弱點</h2>
+<p>以下是我認為老師／助教一定會注意到的地方。先知道，比被問到才發現好。</p>
+
+<table>
+<thead><tr><th>#</th><th>弱點</th><th>嚴重度</th><th>根本原因</th><th>能不能補救</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>三個類別不足 250 張 distinct</strong>（sunny 219、overcast 181、snowy 0）</td><td><span class="tag t-bad">高</span></td><td>資料收集未完成</td><td>補圖即可，程式不用改</td></tr>
+<tr><td>2</td><td><strong>snowy 完全沒有資料</strong>，但模型輸出層有 4 類</td><td><span class="tag t-bad">高</span></td><td>同上</td><td>補圖或明確在報告說明</td></tr>
+<tr><td>3</td><td><strong>scratch CNN 目前只輸出單一類別</strong>：131 張驗證圖全部猜 overcast</td><td><span class="tag t-bad">高</span></td><td>尚未確認（訓練集僅 526 張且類別不均，是否為唯一原因無法在此區分）</td><td>資料補齊後重跑再判定；6.4 節如實記錄了觀察與重測</td></tr>
+<tr><td>4</td><td><strong>部署模型的分類結果與影片檔名不一致</strong>（<code>main-weather-sunny.mp4</code> 判成 rainy）</td><td><span class="tag t-bad">高</span></td><td>尚未確認；資料分佈與模型本身都可能是原因，現階段無法區分</td><td>補齊資料後重跑；必要時才考慮 class weights</td></tr>
+<tr><td>5</td><td><strong>六類延伸未完成</strong>（9.2 / 9.3 / 9.4 全部 pending）</td><td><span class="tag t-pend">中</span></td><td>foggy / lightning 零資料</td><td>補兩類各 250 張，程式會自動跑</td></tr>
+<tr><td>6</td><td><strong>Gradio 三張截圖未補</strong></td><td><span class="tag t-pend">中</span></td><td>需你本人 <code>launch()</code> 後截圖</td><td>見第六節</td></tr>
+<tr><td>7</td><td><strong>來源與授權 19 列全空</strong></td><td><span class="tag t-pend">中</span></td><td>需你提供 url / licence</td><td>見第六節</td></tr>
+<tr><td>9</td><td><strong>所有結果解讀都刻意留白</strong>（6.x / 8.x 只寫事實與機制）</td><td><span class="tag t-pend">中</span></td><td>資料集未齊全（僅 rainy 達標），現在的解讀沒有統計意義</td><td>資料補齊、重跑後補寫，notebook 內已標明</td></tr>
+<tr><td>8</td><td><code>sources.csv</code> 顯示磁碟上有 8622 張原始圖，但只用了 741 張</td><td>低</td><td>大部分是未篩選的原始下載</td><td>正常，篩選本來就會淘汰大量素材</td></tr>
+</tbody>
+</table>
+
+<h2 id="todo">六、notebook 裡還沒填的東西</h2>
+
+<h3>6.1 標題頁的 4 個連結</h3>
+<pre><code>- 資料集（OneDrive / Google Drive）：`&lt;貼上下載連結&gt;`
+- 檔案清單（類別 + 訓練／驗證分割）：`&lt;貼上下載連結&gt;`
+- 訓練好的模型（選項）：`&lt;貼上下載連結&gt;`
+- 示範影片（demo video）：`&lt;貼上下載連結&gt;`</code></pre>
+<p class="small">位置：第 0 個 cell（markdown，id <code>edd42750</code>）。這四行直接編輯 markdown cell 就好，不用重跑。</p>
+
+<h3>6.2 三張截圖</h3>
+<pre><code>&gt; ⚠️ 待補：影像介面（`image_demo.launch()`）套用自己的圖片，顯示四個類別分數。
+&gt; ⚠️ 待補：主要天氣影片介面，顯示主要天氣與四個平均分數。
+&gt; ⚠️ 待補：天氣變化影片介面，顯示時間軋與每段的類別。</code></pre>
+<p class="small">位置：7.2 節的 markdown cell（id <code>7-2-interface-tests</code>）。</p>
+<p><strong>怎麼補</strong>：把 7.0 / 8.2 / 8.4 三節最後被註解掉的 <code># video_demo.launch()</code> 取消註解、執行、截圖、貼進 markdown。<strong>不要</strong>在 notebook 裡 <code>launch()</code> 後直接存檔 —— 會留下一個開著的 server。</p>
+
+<h3>6.3 7.2 節的 AI 揭露佔位</h3>
+<pre><code>AI Used: &lt;說明你使用了哪個工具／代理、請它解決什麼具體問題、採用了什麼或拒絕了什麼，
+以及你如何驗證。若未使用 AI 請寫 `None`。&gt;</code></pre>
+<p>注意：這格是<strong>模板殘留</strong>，跟第 3 個 cell 那張完整的 AI 使用揭露表內容重複。填的時候不要寫「None」（因為你確實用了），要寫具體的工具與驗證方式。</p>
+
+<h3>6.4 sources.csv（19 列）</h3>
+<p>檔案在 <code>datasets/metadata/sources.csv</code>，需要填 <code>url</code> 和 <code>licence</code> 兩欄。填完後<strong>只需重跑 2.2 節那個 cell</strong>（<code>5bd578b3</code>），其他不用動。</p>
+
+<h2 id="gap">七、資料集缺口</h2>
+
+<table>
+<thead><tr><th>類別</th><th class="num">目前 distinct</th><th class="num">還缺</th><th>備註</th></tr></thead>
+<tbody>
+<tr><td>sunny</td><td class="num">219</td><td class="num">31</td><td>最容易補，一般晴天照片即可</td></tr>
+<tr><td>overcast</td><td class="num">181</td><td class="num">69</td><td>注意排除「還看得到藍天」的照片</td></tr>
+<tr><td>rainy</td><td class="num">257</td><td class="num">0</td><td><span class="tag t-done">達標</span></td></tr>
+<tr><td>snowy</td><td class="num">0</td><td class="num">250</td><td>完全空白</td></tr>
+<tr><td>foggy（六類）</td><td class="num">0</td><td class="num">250</td><td>完全空白</td></tr>
+<tr><td>lightning（六類）</td><td class="num">0</td><td class="num">250</td><td>完全空白</td></tr>
+</tbody>
+</table>
+
+<div class="box warn">
+<strong>補圖之後要做什麼</strong>
+把圖丟進 <code>datasets/hand-filtered/&lt;類別&gt;/</code>，然後<strong>重跑整份 notebook</strong>。
+<code>hash_all()</code> 有 mtime 快取，只會計算新加入的檔案，不會重算全部。重跑後所有數字（去重、分割、訓練、評估、影片）都會自動更新。
+</div>
+
+<h2 id="check">八、交件前檢查清單</h2>
+
+<table>
+<thead><tr><th>☐</th><th>項目</th><th>怎麼確認</th></tr></thead>
+<tbody>
+<tr><td>☐</td><td>標題頁 4 個連結已填</td><td>搜尋 <code>&lt;貼上下載連結&gt;</code> 應該找不到</td></tr>
+<tr><td>☐</td><td>三張 Gradio 截圖已貼</td><td>搜尋 <code>待補</code> 應該找不到</td></tr>
+<tr><td>☐</td><td>7.2 節 AI Used 已填</td><td>搜尋 <code>&lt;說明你使用</code> 應該找不到</td></tr>
+<tr><td>☐</td><td><code>sources.csv</code> 19 列已填 url/licence</td><td>重跑 2.2 節，應顯示 <code>rows still needing url/licence: 0 of 19</code></td></tr>
+<tr><td>☐</td><td>notebook 從頭到尾執行過一次，無錯誤</td><td><code>execution_count</code> 應為 1–40 連續；搜尋 <code>output_type": "error</code> 應為 0</td></tr>
+<tr><td>☐</td><td>資料集連結（含 741 張圖 + 分割 CSV）已建立</td><td>自己下載一次確認能解壓</td></tr>
+<tr><td>☐</td><td>模型檔案已上傳</td><td><code>mobilenet_v2.keras</code> 9.2 MB、<code>scratch_cnn.keras</code> 3 MB</td></tr>
+<tr><td>☐</td><td>示範影片已錄</td><td>展示 Gradio 影像介面 + 兩個影片介面操作</td></tr>
+<tr><td>☐</td><td>AI 使用揭露完整（缺漏最多扣 25 分）</td><td>第 3 個 cell 的表格 + 7.2 節的說明</td></tr>
+</tbody>
+</table>
+
+<div class="box ok">
+<strong>重新執行整份 notebook 的指令</strong>
+<pre><code>.venv\Scripts\python.exe tools\fill_notebook.py      # 把 40 個 cell 的程式碼重寫進去（會清空輸出）
+.venv\Scripts\python.exe tools\execute_notebook.py  # 用正式 epoch 執行並把真實輸出寫回</code></pre>
+<span class="small">注意：<code>fill_notebook.py</code> 是 <code>project1.ipynb</code> 的唯一程式碼來源。如果你直接在 notebook 裡改程式碼，之後跑 <code>fill_notebook.py</code> 會被蓋掉。改程式請改 <code>tools/fill_notebook.py</code>。</span>
+</div>
+
+<hr>
+<p class="small muted">本文件根據 <code>project1.ipynb</code>（82 cells，已存檔輸出）與 <code>weather_lib.py</code>（835 行）實際內容產生。所有數字取自 notebook 內已執行的輸出，非人工填寫。</p>
+
+</div>
+</body>
+</html>

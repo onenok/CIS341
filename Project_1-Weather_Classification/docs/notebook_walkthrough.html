@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIS341 Project 1 — 程式碼導覽</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['"Noto Sans TC"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Cascadia Code"', 'Consolas', 'monospace'],
+      },
+      colors: {
+        sunk: '#070b16',
+        panel: '#0d1424',
+        line: '#1c2740',
+        sun: '#fbbf24',
+        sky: '#38bdf8',
+        rain: '#4a90d9',
+        snow: '#a5c9e8',
+      },
+    },
+  },
+};
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(56,189,248,.10), transparent 60%),
+      radial-gradient(900px 500px at 90% 0%, rgba(251,191,36,.09), transparent 55%),
+      #070b16;
+    background-attachment: fixed;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0a1020; }
+  ::-webkit-scrollbar-thumb { background: #22304d; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #33456b; }
+
+  .card {
+    background: linear-gradient(180deg, rgba(19,28,48,.85), rgba(11,17,31,.9));
+    border: 1px solid #1c2740;
+    backdrop-filter: blur(6px);
+  }
+  .card:hover { border-color: #2b3b5e; }
+
+  .tab-btn { transition: all .18s ease; }
+  .tab-btn.active {
+    background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.06));
+    border-color: rgba(56,189,248,.55);
+    color: #e0f2fe;
+    box-shadow: 0 0 0 1px rgba(56,189,248,.15), 0 8px 24px -12px rgba(56,189,248,.6);
+  }
+
+  .nav-btn { transition: all .14s ease; border-left: 2px solid transparent; }
+  .nav-btn:hover { background: rgba(255,255,255,.04); border-left-color: #33456b; }
+  .nav-btn.active {
+    background: rgba(56,189,248,.10);
+    border-left-color: #38bdf8;
+    color: #e0f2fe;
+  }
+
+  pre.code {
+    font-variant-ligatures: none;
+    tab-size: 4;
+    line-height: 1.55;
+  }
+  pre.code::-webkit-scrollbar { height: 8px; }
+
+  .fade-in { animation: fadeIn .3s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .glow-sun { box-shadow: 0 0 0 1px rgba(251,191,36,.25), 0 12px 40px -18px rgba(251,191,36,.55); }
+  .glow-sky { box-shadow: 0 0 0 1px rgba(56,189,248,.25), 0 12px 40px -18px rgba(56,189,248,.55); }
+
+  .kbd {
+    display: inline-block; padding: 1px 6px; border-radius: 4px;
+    background: #16203a; border: 1px solid #2a3a5c;
+    font-family: ui-monospace, monospace; font-size: 11px; color: #9fb4d8;
+  }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .chev { transform: rotate(90deg); }
+  .chev { transition: transform .18s ease; display: inline-block; }
+
+  .rule { background: linear-gradient(90deg, transparent, #24334f, transparent); height: 1px; }
+
+  .hl { color: #fbbf24; font-weight: 600; }
+  .hl2 { color: #38bdf8; font-weight: 600; }
+  code.inline {
+    background: #16203a; border: 1px solid #24334f; border-radius: 4px;
+    padding: 1px 5px; font-size: .86em; color: #a8c7e8;
+    font-family: ui-monospace, Consolas, monospace;
+  }
+</style>
+</head>
+<body class="min-h-screen text-slate-300 font-sans antialiased">
+
+<!-- ───────────────────────── header ───────────────────────── -->
+<header class="sticky top-0 z-40 border-b border-line/80 bg-sunk/80 backdrop-blur-xl">
+  <div class="mx-auto max-w-[1600px] px-4 sm:px-6">
+    <div class="flex flex-wrap items-center gap-3 py-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-sky/25 to-sun/20 ring-1 ring-white/10 text-lg">🌤️</div>
+        <div class="min-w-0">
+          <h1 class="truncate text-[15px] font-semibold tracking-wide text-slate-100">CIS341 Project 1 — 天氣分類程式碼導覽</h1>
+          <p class="truncate text-[11px] text-slate-500">S26202765 · 4 類 91.4% / 6 類 90.9% · TensorFlow 2.16 · CPU</p>
+        </div>
+      </div>
+
+      <nav class="ml-auto flex items-center gap-2" id="tabs">
+        <button data-tab="nb" class="tab-btn active rounded-lg border border-line px-4 py-2 text-[13px] font-medium text-slate-400">
+          <span class="mr-1.5">📓</span>project1.ipynb
+        </button>
+        <button data-tab="lib" class="tab-btn rounded-lg border border-line px-4 py-2 text-[13px] font-medium text-slate-400">
+          <span class="mr-1.5">🧩</span>weather_lib.py
+        </button>
+      </nav>
+    </div>
+
+    <div class="pb-3">
+      <div class="relative">
+        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">🔎</span>
+        <input id="search" type="search" autocomplete="off" spellcheck="false"
+               placeholder="搜尋函式、cell、關鍵字…（按 / 聚焦）"
+               class="w-full rounded-lg border border-line bg-panel/80 py-2 pl-9 pr-24 text-[13px] text-slate-200 placeholder-slate-600 outline-none transition focus:border-sky/60 focus:ring-2 focus:ring-sky/15">
+        <span id="searchCount" class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-500"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
+
+  <!-- ═══════════════ TAB: notebook ═══════════════ -->
+  <section id="tab-nb">
+    <div class="grid gap-6 lg:grid-cols-[248px_1fr]">
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-[132px] space-y-1">
+          <p class="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[.18em] text-slate-600">章節</p>
+          <div id="nb-nav" class="space-y-0.5"></div>
+          <div class="mt-4 rule"></div>
+          <div class="mt-3 space-y-1 px-3 text-[11px] leading-relaxed text-slate-600">
+            <p><span class="kbd">1</span> <span class="kbd">2</span> 切換分頁</p>
+            <p><span class="kbd">/</span> 搜尋　<span class="kbd">Esc</span> 清除</p>
+          </div>
+        </div>
+      </aside>
+
+      <div class="min-w-0">
+        <div id="nb-kpi" class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
+        <div id="nb-content" class="space-y-10"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TAB: weather_lib ═══════════════ -->
+  <section id="tab-lib" class="hidden">
+    <div class="grid gap-6 lg:grid-cols-[248px_1fr]">
+
+      <aside class="hidden lg:block">
+        <div class="sticky top-[132px] space-y-1">
+          <p class="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[.18em] text-slate-600">功能域</p>
+          <div id="lib-nav" class="space-y-0.5"></div>
+        </div>
+      </aside>
+
+      <div class="min-w-0">
+        <div id="lib-intro" class="mb-6"></div>
+        <div id="lib-content" class="space-y-10"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="mx-auto max-w-[1600px] px-6 pb-10 pt-4 text-[11px] text-slate-600">
+  <div class="rule mb-4"></div>
+  <p>本頁內容由 <code class="inline">project1.ipynb</code>（82 cells）與 <code class="inline">weather_lib.py</code>（869 行）實際原始碼與執行輸出整理而成。
+  所有數字皆取自 <code class="inline">runs/history.json</code>、<code class="inline">models/deployment_choice.json</code> 與 <code class="inline">datasets/splits/</code>。</p>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   真實數據（全部從專案檔案讀出，非估計）
+   ══════════════════════════════════════════════════════════════════ */
+const HIST = {
+  scratch: {
+    label: 'scratch_cnn',
+    color: '#fbbf24',
+    train: [0.4373,0.5476,0.5316,0.5964,0.7067,0.7369,0.7511,0.7413,0.7582,0.7982,0.7724,0.7893,0.8071,0.8116,0.8027],
+    val:   [0.5750,0.5679,0.5750,0.6464,0.6964,0.7321,0.6179,0.7857,0.8036,0.7393,0.7500,0.7571,0.7429,0.7607,0.7786],
+  },
+  mobilenet: {
+    label: 'mobilenet_v2',
+    color: '#38bdf8',
+    train: [0.6338,0.8151,0.8720,0.8907,0.8898,0.9049,0.9218,0.9182,0.9236,0.9307,0.9262,0.9316,0.9396,0.9378,0.9493,0.9564,0.9413,0.9396,0.9458,0.9547],
+    val:   [0.7821,0.8536,0.8893,0.8929,0.9071,0.9000,0.9071,0.9107,0.9143,0.9107,0.9286,0.9250,0.9143,0.9107,0.9143,0.9107,0.9179,0.9107,0.9071,0.9036],
+  },
+};
+
+const DATASET = [
+  { label: 'foggy',     files: 915, train: 732, val: 183, color: '#94a3b8' },
+  { label: 'snowy',     files: 537, train: 430, val: 107, color: '#a5c9e8' },
+  { label: 'sunny',     files: 341, train: 252, val: 63,  color: '#fbbf24' },
+  { label: 'overcast',  files: 314, train: 234, val: 58,  color: '#9aa0a6' },
+  { label: 'lightning', files: 309, train: 247, val: 62,  color: '#facc15' },
+  { label: 'rainy',     files: 287, train: 209, val: 52,  color: '#4a90d9' },
+];
+
+const KPI = [
+  { k: '四類驗證準確率', v: '91.43%', s: 'mobilenet_v2 · 280 張', tone: 'sky' },
+  { k: '四類 macro F1',  v: '0.9095', s: '每類等權重', tone: 'sky' },
+  { k: '六類驗證準確率', v: '90.86%', s: '525 張 · macro F1 0.900', tone: 'sun' },
+  { k: '資料集',         v: '2,703',  s: '去重後 2,629 張', tone: 'sun' },
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   project1.ipynb — 82 cells / 9 章
+   ══════════════════════════════════════════════════════════════════ */
+const NB = [
+{
+  id: 'ch1', num: 1, title: 'Library Imports & Configuration', zh: '程式庫匯入與設定',
+  range: 'cells 0 – 3',
+  lead: '整份 notebook 的地基。目標只有兩件事：<b>讓同一份程式碼執行兩次得到完全相同的數字</b>，以及<b>讓資料還沒收齊時 notebook 不會爆掉</b>。',
+  why: '這章看似只是 import，但它決定了後面 5 個章節能不能被複現。作業要求「報告裡的數字必須是真實執行輸出」，而沒有固定種子的話，每次跑出來的 0.9143 都會不一樣，報告就無法對照。',
+  cells: [
+    { n: 0, type: 'md', title: '標題頁與提交連結', body: '課程資訊、資料集／檔案清單／模型／示範影片四個下載連結、目錄。這頁是給批改者看的入口。' },
+    { n: 1, type: 'md', title: '章節導言', body: '說明本章要做什麼，並保留 <code class="inline">AI Used:</code> 欄位供填寫。' },
+    { n: 2, type: 'code', title: '匯入、版本、可重現性',
+      why: '四個套件各有自己的亂數產生器，所以要分別設種子 —— 只設一個等於沒設。',
+      bullets: [
+        '<code class="inline">os.environ["PYTHONHASHSEED"]</code> + <code class="inline">random.seed</code> + <code class="inline">np.random.seed</code> + <code class="inline">tf.keras.utils.set_random_seed(341)</code>：Python 內建、NumPy、TensorFlow 三層全部鎖定。',
+        '<code class="inline">sys.path.insert(0, str(Path.cwd()))</code>：<b>這行是踩過坑才加的</b>。nbconvert 執行時 kernel 的 cwd 是 notebook 所在目錄，若不插入路徑，<code class="inline">import weather_lib</code> 會直接失敗，而錯誤會偽裝成一連串 NameError。',
+        '<code class="inline">require(classes, need)</code>：全 notebook 的守門員。資料夾還沒收好時印出提示並回傳 False，而不是丟 traceback —— 因為資料集是一天一天收集的，中途必須能執行。',
+        '<code class="inline">W.ensure_dirs()</code>：一次建好 metadata / splits / models / Reports / cache 五個輸出資料夾。',
+      ],
+      out: 'python: 3.12.10  ·  tensorflow: 2.16.1  ·  keras: 3.x\n運算裝置: 僅 CPU   ← TF ≥ 2.11 不再提供原生 Windows GPU wheel' },
+    { n: 3, type: 'md', title: 'AI 使用聲明', body: '七列對照表：資料集收集／notebook 骨架／類別定義／模型設計／訓練分析／Gradio 介面／報告文字，逐一標明「AI 做了什麼、我自己做了什麼」。這是作業明文要求的揭露。' },
+  ],
+},
+{
+  id: 'ch2', num: 2, title: 'Data Collection', zh: '資料收集',
+  range: 'cells 4 – 13',
+  lead: '證明每個類別有 ≥250 張<b>互不相同且可用</b>的原圖，並把「什麼算 sunny、什麼不算」寫成可稽核的規則。',
+  why: '這一章的真正難點不是收集，而是<b>邊界判定</b>。同一張灰濛濛的照片，在不同人心裡可能是 sunny 也可能是 overcast。若不把判定原則寫下來，標籤噪音就會變成後面所有數字的上限。',
+  cells: [
+    { n: 5, type: 'code', title: '類別資料夾盤點',
+      why: '先確認磁碟上真的有東西，再談其他。',
+      bullets: ['對 <code class="inline">W.CLASS_ORDER</code> 逐類列出資料夾路徑、是否存在、圖片數，組成 DataFrame 顯示。'],
+      out: '四類全部 present = True' },
+    { n: 7, type: 'code', title: '2.1 類別定義與模糊政策',
+      why: '每一類都有 <b>include</b>（什麼算）與 <b>exclude</b>（什麼不算）兩欄。exclude 欄是實際判定時用的規則，不是抄作業說明。',
+      bullets: [
+        '<b class="hl">sunny vs overcast</b>：以「陽光是否照射到地面」判定，<b>不是</b>以「還剩多少藍天」。這是整份資料集最重要的一條規則。',
+        '<b class="hl">overcast vs rainy</b>：有雨絲／水霧就判 rainy；overcast 必須完全沒有降水。',
+        '<b class="hl">rainy</b>：濕路面<b>單獨</b>不足以判定（作業明文如此）。',
+        '無法判斷的一律移到 <code class="inline">_rejected</code>，不猜。',
+      ] },
+    { n: 9, type: 'code', title: '2.2 來源與授權',
+      why: '表格是從磁碟<b>實際掃描生成</b>的，所以不可能聲稱一個不存在的來源。',
+      bullets: [
+        '<code class="inline">count_leaf_images()</code> 用 <code class="inline">rglob</code> 找出所有直接存放圖片的資料夾，每個一列。',
+        '<code class="inline">url</code> 與 <code class="inline">licence</code> 兩欄<b>刻意留空</b>：必須從下載頁複製，不能猜，因為報告與提交的資料集都會引用。',
+      ],
+      out: '仍缺 url 或 licence 的列數：0 / 23   ← 已全部補齊\n來源包含 BDD100K、MWD (CC BY 4.0)、WEAPD (CC0)、cuaca (CC0)' },
+    { n: 11, type: 'code', title: '2.3 各類別原始數量',
+      why: '這裡畫的是「收到」的張數，不是最終可用張數。',
+      bullets: ['bar chart 顯示 <code class="inline">scan_counts()</code> 的結果。', '刻意在圖下註明：<b>作業的 250 張下限是對去重後的相異原圖檢查</b>，不是對這裡的數字。'],
+      out: 'foggy 915 · snowy 537 · sunny 341 · overcast 314 · lightning 309 · rainy 287' },
+    { n: 13, type: 'code', title: '2.4 重複帳本與保留／剔除範例',
+      why: '這格最重要的是那個 <code class="inline">assert</code>：同一張圖被歸到兩個類別時，notebook 直接中止。這不是 bug，是刻意的 —— 那是只有人能做的標註決定。',
+      bullets: [
+        '<code class="inline">build_index()</code> → 寫入 <code class="inline">image_index.csv</code>（每張圖的路徑、標籤、群組 id、md5）',
+        '<code class="inline">cross_label_groups()</code> 找出跨類群組；有就 <code class="inline">raise AssertionError</code>',
+        '<code class="inline">show_grid()</code> 這個小工具處理了 pandas 的 <code class="inline">Scalar</code> 型別（聯集型別，可能含 bytes/Timestamp），統一轉成 <code class="inline">Path</code>，否則 <code class="inline">Image.open()</code> 會炸',
+      ],
+      out: '跨類群組數：0\n被剔除／擱置的圖片：顯示前 8 張' },
+  ],
+},
+{
+  id: 'ch3', num: 3, title: 'Data Preparation', zh: '資料準備',
+  range: 'cells 14 – 23',
+  lead: '在訓練開始之前，先把「模型實際會收到什麼」驗證完畢：標籤、顏色、形狀、數值範圍、類別順序。',
+  why: '這一章是整個專案<b>投資報酬率最高的地方</b>。後面兩個真正的 bug（前處理重複、BatchNorm 失效）都是在這裡的探針輸出上被看出來的。',
+  cells: [
+    { n: 15, type: 'code', title: '索引與去重，檢查 250 下限',
+      why: '作業計算的是「相異且可用的原圖」，所以必須先去重再計算。',
+      bullets: [
+        '<code class="inline">build_index()</code> → <code class="inline">dedupe()</code> → <code class="inline">counts_table()</code>',
+        '<b class="hl">磁碟上不刪任何檔案</b>：<code class="inline">dedupe()</code> 只過濾索引，每個群組保留<b>檔案最大</b>的那張當代表（同一張照片常同時存在原始版與縮圖版）',
+        '最後列出仍不足 250 張的類別',
+      ],
+      out: '已建立索引：2,703 張 → 去重後 2,629 張\n不足 250 張的類別：無' },
+    { n: 17, type: 'code', title: '3.1 群組感知分層分割',
+      why: '如果同一張照片（或它的縮圖）同時出現在 train 和 val，驗證準確率就會虛高。所以分割是<b>以「群組」為單位</b>，不是以「圖片」為單位。',
+      bullets: [
+        '<code class="inline">make_split(dedup, val_fraction=0.2, seed=341)</code>',
+        '三個 assert 保護：<code class="inline">len(split) == len(dedup)</code>（沒遺失）、每個群組只在一側（沒洩漏）、<code class="inline">group</code> 欄唯一（沒重複副本）',
+        '輸出 <code class="inline">four_class_split.csv</code>',
+      ],
+      out: 'train 1125 / val 280\n跨越 train/val 的重複群組數：0' },
+    { n: 19, type: 'code', title: '3.2 tf.data 載入器與批次預覽',
+      why: '在任何訓練之前先確認管線正確，比訓練 40 epoch 後才發現問題省 40 倍時間。',
+      bullets: [
+        '<code class="inline">W.make_dataset(train_df, spec, 32, shuffle=True)</code>',
+        '<code class="inline">dataset_summary()</code> 印出 shape / dtype / min / max —— <b>這是驗證前處理有沒有正確的第一個探針</b>',
+        '畫出第一批 8 張圖，確認影像方向沒被翻轉、顏色正常',
+      ],
+      out: '訓練批次數 36 · 驗證批次數 9\nimages_dtype: float32 · images_min: 0.0 · images_max: 1.0' },
+    { n: 21, type: 'code', title: '3.3 前處理契約（關鍵探針）',
+      why: '這裡把 <code class="inline">[0, 128, 255]</code> 三個像素值餵進每個模型的 <code class="inline">spec.fn</code>，看它們變成什麼。這三行輸出就是「前處理有沒有重複執行」的鐵證。',
+      bullets: [
+        '<code class="inline">scratch</code>：除以 255 → <code class="inline">[0, 0.502, 1]</code>',
+        '<code class="inline">mobilenet_v2</code>：<code class="inline">preprocess_input</code> → <code class="inline">[-1, 0.004, 1]</code>',
+        '若模型內又放一層縮放，這裡會看到 <code class="inline">[0, 0.002, 0.004]</code>（除以兩次）或全部貼近 <code class="inline">-1.0</code>',
+      ],
+      out: 'scratch       0/128/255 -> [0.    0.502 1.   ]\nmobilenet_v2  0/128/255 -> [-1.     0.004  1.   ]' },
+    { n: 23, type: 'code', title: '3.4 類別順序契約',
+      why: '類別順序是<b>單一契約</b>：訓練時的 label→index 對應，必須與推論時完全一致，否則預測會安靜地整體偏移一個類別（而且不會報錯）。',
+      bullets: [
+        '寫出 <code class="inline">models/class_order.json</code>，內含 <code class="inline">class_order</code>、<code class="inline">label_to_id</code>、<b class="inline">新增的</b> <code class="inline">preprocess</code> 欄位',
+        '<code class="inline">preprocess</code> 記錄每個模型的 image_size 與 scaling —— 因為模型已移除縮放層，<b>配方必須寫在權重旁邊</b>，否則載入權重的人不知道該怎麼前處理',
+        'assert 資料夾中沒有 <code class="inline">CLASS_ORDER</code> 以外的類別',
+      ],
+      out: '{"class_order": ["sunny","overcast","rainy","snowy"],\n "preprocess": {"scratch": {"image_size":[128,128], "scaling":"... /255"},\n                "mobilenet_v2": {"image_size":[224,224], "scaling":"... [-1,1]"}}}' },
+  ],
+},
+{
+  id: 'ch4', num: 4, title: 'Data Augmentation', zh: '資料增強',
+  range: 'cells 24 – 31',
+  lead: '只使用<b>真實相機或真實天氣會產生</b>的轉換。不使用任何會憑空造出另一種天氣狀況的轉換。',
+  why: '增強的風險不是「不夠多」，而是「造出假的類別特徵」。垂直翻轉會讓天空跑到地上，色相旋轉會讓藍天變綠天 —— 這些都會教模型錯誤的線索，比不增強更糟。',
+  cells: [
+    { n: 25, type: 'code', title: '4.0 增強器組成',
+      why: '每個圖層都附上「為什麼」欄位，對應真實拍攝條件。',
+      bullets: [
+        '<code class="inline">RandomFlip("horizontal")</code> — 手機可正拿反拿，天氣左右對稱',
+        '<code class="inline">RandomRotation(0.15)</code> — 手持傾斜',
+        '<code class="inline">RandomZoom((-0.10, 0.10))</code> — 與被攝物距離不同',
+        '<code class="inline">RandomBrightness(0.12)</code> — 不同日子的曝光不同',
+        '<code class="inline">RandomContrast(0.15)</code> — 霧氣／感光元件色調曲線',
+        '<code class="inline">SaturationJitter(0.85, 1.15)</code> — Keras 3.1 沒有內建飽和度層，這是自己寫的 Layer',
+      ],
+      out: 'augmenter 的輸入範圍是 float32 的 0..255（縮放是在它之後才發生）' },
+    { n: 27, type: 'code', title: '4.1 刻意「不用」的轉換',
+      why: '把「不做什麼」也寫成表格，比只列「做了什麼」更能說服批改者你真的想過。',
+      bullets: [
+        '❌ <b>垂直翻轉</b> — 造出天空在地上的圖片，現實不存在',
+        '❌ <b>色相旋轉</b> — 藍天不該變綠天或雨天',
+        '❌ <b>大幅隨機裁切</b> — 雨絲與積雪都是細微特徵，裁切會把證據裁掉',
+        '❌ <b>cutout／抹除</b> — 黑色方塊像天空破洞，會教錯線索',
+        '✅ 亮度、對比、飽和度、小幅旋轉／縮放／翻轉',
+      ] },
+    { n: 29, type: 'code', title: '4.2 每類並列預覽',
+      why: '作業要求「每個類別」都要有原圖與增強版並列。純隨機抽樣做不到這件事 —— 在四個均衡類別上抽 6 張，約 <b>62%</b> 的機率會漏掉至少一個類別，而漏一個就丟掉整個項目的分數。',
+      bullets: [
+        '<code class="inline">sample_per_class(train_df, per_class=1)</code> 保證每類都抽到',
+        '抽完立刻 <code class="inline">assert set(covered) == set(expected)</code>',
+        '<code class="inline">augment_preview(images, augmenter, rounds=2)</code> 產生兩次獨立抽樣 —— 讓讀者看到增強的<b>隨機性</b>，而不是誤以為它是固定轉換',
+        '像素維持 0..255（預覽讀原始像素，因為增強器是以像素單位定義的）',
+      ],
+      out: '兩次抽樣是否不同：True —— 這正是讓增強成為正規化手段的原因' },
+    { n: 31, type: 'code', title: '4.3 證明增強只在訓練管線',
+      why: '「驗證集不做增強」不能只是口頭聲明，要有數值證據。',
+      bullets: [
+        '同一個 <code class="inline">train_df</code> 建兩個 loader（有／無 augmenter），比較平均像素與 <code class="inline">allclose</code>',
+        '驗證 loader 連續載入兩次 → 必須<b>位元級相同</b>',
+        '驗證 loader 若硬加上 augmenter → 必須不同',
+        '訓練批次每個 epoch 都不同（shuffle + 增強）',
+      ],
+      out: '驗證載入器具確定性（無增強）：True\n驗證載入器若加上增強器就會不同：True\n訓練批次每個 epoch 都不同：True' },
+  ],
+},
+{
+  id: 'ch5', num: 5, title: 'Model Design', zh: '模型設計',
+  range: 'cells 32 – 39',
+  lead: '兩種方法在<b>完全相同的分割</b>上比較，因此唯一的變數就是模型本身。',
+  why: '若兩個模型用了不同的分割、不同的前處理、不同的批次大小，那麼「哪個比較好」的結論就沒有意義。這一章把所有其他變數固定住，讓第 6.6 節的比較成立。',
+  cells: [
+    { n: 33, type: 'code', title: '5.0 設計對照表',
+      why: '用表格把兩個模型的差異、風險、以及「各自證明了什麼」講清楚。',
+      bullets: [
+        'scratch CNN：128×128、隨機初始化、全部參數可訓練、風險是過擬合',
+        'transfer：224×224（ImageNet 原生尺寸）、凍結主幹、只有分類頭可訓練、風險是室內線索無法轉移',
+        '<code class="inline">param_table(model)</code> 輔助函式：算出 total / trainable / frozen',
+      ] },
+    { n: 35, type: 'code', title: '5.1 從零訓練的 CNN（含兩個修正）',
+      why: '這個 cell 是本次除錯的主戰場。註解直接寫明兩個「刻意不放」的層，以及原因。',
+      bullets: [
+        '<b class="hl">架構</b>：4 個 block，每塊是 Conv2D(32/64/128/128) → ReLU → MaxPool，卷積用 <code class="inline">l2(1e-4)</code> 正規化 → GlobalAveragePooling → Dropout(0.4) → Dense(128) → Dense(4, softmax)',
+        '<b class="hl">不放 Rescaling</b>：<code class="inline">spec_for("scratch")</code> 已在 tf.data 內除以 255。兩者並存會讓像素被縮放兩次，壓到 <code class="inline">0..0.004</code>',
+        '<b class="hl">不放 BatchNormalization</b>：它的移動平均需約 <code class="inline">1/(1-0.99) = 100</code> 次更新才成熟，而這份分割每 epoch 只有 36 次更新。結果訓練準確率 0.81，驗證卻一直停在全猜 overcast',
+        '<code class="inline">x = inputs</code> 這一行<b>不能省</b> —— 移除 Rescaling 後若沒補這行，迴圈第一次迭代就會 <code class="inline">UnboundLocalError</code>',
+      ],
+      out: 'total 102,788 / trainable 102,788 / frozen 0\n修正後 val_acc（ep1）：0.571（修正前是 0.207 = 全猜 overcast）' },
+    { n: 37, type: 'code', title: '5.2 遷移學習模型（含一個修正）',
+      why: 'MobileNetV2 主幹凍結，只訓練一個小的分類頭。這裡同樣有一個「刻意不放」的層。',
+      bullets: [
+        '<code class="inline">MobileNetV2(include_top=False, weights="imagenet")</code> + <code class="inline">base.trainable = False</code>',
+        '<b class="hl">不放 Lambda(preprocess_input)</b>：<code class="inline">spec_for("mobilenet_v2")</code> 已在 tf.data 內套用過。重複一次會把每個像素映射到大約 <code class="inline">-1.0</code>，整張圖被壓平成常數',
+        '模型直接從 <code class="inline">base(inputs, training=False)</code> 開始',
+        '頭部：GAP → Dropout(0.3) → Dense(4, softmax)',
+      ],
+      out: 'total 2,261,828 / trainable 5,124 / frozen 2,256,704（只有 0.2% 可訓練）\n修正後 val_acc（ep1）：0.800（修正前是 0.482）' },
+    { n: 39, type: 'code', title: '5.3 參數並列',
+      why: '這是「為什麼兩個模型在約 1100 張圖上表現差這麼多」最簡潔也最誠實的摘要。',
+      bullets: ['算出 <code class="inline">trainable_%</code> 並並列顯示', '呼叫兩次 <code class="inline">model.summary()</code> 留下完整層表'],
+      out: 'scratch_cnn    trainable 100.0%\nmobilenet_v2   trainable   0.2%' },
+  ],
+},
+{
+  id: 'ch6', num: 6, title: 'Model Training & Analysis', zh: '模型訓練與分析',
+  range: 'cells 40 – 53',
+  lead: '保留程式碼、Keras 日誌與 history，然後做<b>受控調查</b>：觀察 → 只改一個因素 → 在同一驗證集重測。',
+  why: '作業要求的不是「跑出好數字」，而是「看到可疑數字時去查」。第 6.4 節就是這個要求的實作：它抓到並修掉了兩個真實缺陷。',
+  cells: [
+    { n: 41, type: 'code', title: '訓練工具（callbacks）',
+      why: '三個 callback 全部監控 <code class="inline">val_loss</code>，這是統一標準。',
+      bullets: [
+        '<code class="inline">ModelCheckpoint(save_best_only=True)</code> → <code class="inline">models/{name}.keras</code>',
+        '<code class="inline">EarlyStopping(patience=6, restore_best_weights=True)</code>',
+        '<code class="inline">ReduceLROnPlateau(factor=0.5, patience=3, min_lr=1e-6)</code> —— 從日誌可看到 lr 在 ep15 由 1e-3 降到 5e-4',
+      ] },
+    { n: 43, type: 'code', title: '6.1 訓練設定',
+      why: '設定集中在一個 dict，報告可以直接引用，不會出現「文件寫的和實際跑的不同」。',
+      bullets: ['<code class="inline">batch_size 32</code> · <code class="inline">epochs_scratch 40</code> · <code class="inline">epochs_transfer 20</code>', '<code class="inline">Adam</code> · <code class="inline">lr 1e-3</code> · <code class="inline">sparse_categorical_crossentropy</code>', '<code class="inline">early_stopping_patience 6</code> · 增強只套用訓練集', '同時初始化 <code class="inline">histories = {}</code> 與 <code class="inline">trained = {}</code>'] },
+    { n: 45, type: 'code', title: '6.2 訓練兩個模型',
+      why: '<code class="inline">train_one()</code> 把「建 loader → 計時 → fit → 回傳」封裝起來，兩個模型走完全相同的流程。',
+      bullets: [
+        '訓練前的防護 assert：<code class="inline">split["group"].is_unique</code> 與 <code class="inline">not set(train_df["group"]) & set(val_df["group"])</code>',
+        '每個模型使用<b>自己 spec 的</b>批次大小與輸入尺寸（128 vs 224）',
+        '結果存進 <code class="inline">VAL_DS</code> 字典，供 6.4 節「同一驗證集」重測使用',
+      ],
+      out: 'scratch_cnn：訓練 15 個 epoch（early stop），最佳 ep9 → val_acc 0.8036\nmobilenet_v2：訓練 20 個 epoch，最佳 ep15 → val_acc 0.9143，耗時 8m 51s' },
+    { n: 47, type: 'code', title: '6.3 訓練曲線',
+      why: '曲線是「有沒有過擬合」最直觀的證據，而且必須用<b>實際 epoch 數</b>解釋，不能只看最後一點。',
+      bullets: ['<code class="inline">plot_history()</code> 畫 train/val 的 loss 與 accuracy 並列', '同時把完整 history 寫成 <code class="inline">runs/history.json</code>，讓數字可被外部核對'],
+      chart: 'curves' },
+    { n: 49, type: 'code', title: '6.4 受控調查（最重要的除錯章節）',
+      why: '作業明文要求示範「觀察 → 改變 → 重測」。這裡只改<b>一個</b>因素（關閉增強器），其餘全部固定：分割、種子、架構、最佳化器、學習率、批次大小、epoch 預算、callbacks、驗證集。',
+      bullets: [
+        '<b>觀察</b>：訓練準確率持續上升，驗證損失停止改善',
+        '<b>檢查</b>：量測 train/val 準確率落差 <code class="inline">gap</code>',
+        '<b>改變</b>：<code class="inline">augment=None</code>，其他不動',
+        '<b>重測</b>：兩個變體在<b>完全相同</b>的 <code class="inline">VAL_DS["scratch_cnn"]</code> 上評分',
+        '額外產出：混淆矩陣、macro F1、誤分類張數、錯誤時的平均信心 vs 正確時的平均信心',
+        '把「信心最高的錯誤」排在前面（<code class="inline">argsort(-conf * wrong)</code>，正確項為 0）做成 6 格圖',
+      ],
+      out: '使用增強  train_acc 0.803  val_acc 0.804  gap +0.024（此為修正後的健康狀態）\n正確時平均信心 > 錯誤時平均信心 → 模型不是亂猜' },
+    { n: 51, type: 'code', title: '6.5 同驗證集評估',
+      why: '兩個模型在同一個、未增強的驗證集上評分，才有可比性。',
+      bullets: ['<code class="inline">W.evaluate_model()</code> 回傳 accuracy / confusion_matrix / classification_report / y_true / y_pred / y_prob', '<code class="inline">W.confusion_table()</code> 加上 row_total 欄'],
+      out: 'scratch_cnn    accuracy 0.8036   macro F1 0.770   （rainy recall 僅 0.385）\nmobilenet_v2   accuracy 0.9143   macro F1 0.909   （rainy recall 0.942）' },
+    { n: 53, type: 'code', title: '6.6 比較表與部署選擇',
+      why: '用<b>一條明確的規則</b>選模型，而不是憑感覺。',
+      bullets: [
+        '準確率與 macro F1 併列 —— 兩者回答不同問題（前者看整體，後者每類等權重）',
+        'merge <code class="inline">bits_of_training()</code> 得到 epochs_run / best_epoch / overfit_gap',
+        '選擇規則：<b>共用的分割上取得最高驗證準確率</b>',
+        '輸出 <code class="inline">models/deployment_choice.json</code>，並設定 <code class="inline">deployed_model</code> / <code class="inline">deployed_spec</code> 供第 7、8 章使用',
+      ],
+      out: '部署的模型：mobilenet_v2 | 驗證準確率：0.9143' },
+  ],
+},
+{
+  id: 'ch7', num: 7, title: 'Image Interface (Gradio)', zh: '影像介面',
+  range: 'cells 54 – 57',
+  lead: '用部署的模型與<b>正確的前處理</b>，透過 <code class="inline">gr.Label</code> 顯示全部四個具名分數。',
+  why: '介面是「模型真的能用」的證明。但它也是最容易出錯的地方：callback 若用了與訓練不同的前處理，畫面會顯示四個看起來很正常、實際上完全錯的分數。',
+  cells: [
+    { n: 55, type: 'code', title: '7.1 影像介面',
+      why: '幾個容易踩的 Gradio 陷阱都在這裡處理掉了。',
+      bullets: [
+        '模型與 spec 在 callback <b>之外</b>載入一次，介面才能即時回應',
+        '<b class="hl">只有一個</b> <code class="inline">gr.Label</code> 輸出時，callback 必須回傳<b>單一值</b>。回傳 tuple 會被 Gradio 拆開丟給 Label，拋出 ValueError',
+        '模型未訓練時用 <code class="inline">gr.Warning()</code> 並回傳空 dict，<b>不要</b> raise',
+        '空輸入用 <code class="inline">gr.Error()</code>，讓使用者看到可讀訊息而不是 traceback',
+        '<code class="inline">deployed_spec.fn(arr)</code> —— 前處理只在此處發生，與訓練完全一致',
+      ],
+      out: 'title: Weather classification\ndescription: 模型：mobilenet_v2 | 類別：sunny, overcast, rainy, snowy' },
+    { n: 57, type: 'code', title: '7.2 各類別介面測試',
+      why: '作業要求每類都要有「圖片 + 預期標籤 + 實際結果」，並說明是訓練／驗證／新資料。',
+      bullets: [
+        '<code class="inline">interface_cases()</code> 每類各抽 train 一張、val 一張，再從 <code class="inline">weather-recognition/dataset/rain</code> 取 3 張未見資料',
+        '<b class="hl">「新資料」要能證明</b>：用 md5 比對分割，確認這 3 張<b>不是</b>任何訓練／驗證圖的完全相同副本',
+        '直接呼叫 <code class="inline">predict_image()</code>，讓證據存進 notebook 而不只是畫面上',
+        '最後測試空輸入是否被 <code class="inline">gr.Error</code> 拒絕',
+      ],
+      out: '新資料檢查：3 個檔案，其中已是分割內副本的：0\n11 個案例中 9 個正確（81.8%）\n錯誤案例：cloudy147.jpg → 判 sunny（只有天空、看不到地面）\n          rain102.jpg → 判 snowy（白色水花與雪的外觀幾乎相同）' },
+  ],
+},
+{
+  id: 'ch8', num: 8, title: 'Video Inference', zh: '影片推論',
+  range: 'cells 58 – 71',
+  lead: '四個分開評分的元件：主要天氣預測、主要天氣介面、天氣變化預測、天氣變化介面。',
+  why: '影片推論與單張圖片有三個本質差異：<b>要取樣</b>（不能每格都算）、<b>要平均</b>（作業明文要求對機率向量取平均）、<b>要保留原時序</b>（不能掉格）。',
+  cells: [
+    { n: 59, type: 'code', title: '8.0 影片清單',
+      why: '先列出所有 mp4 的 fps／幀數／秒數／解析度，這樣一眼就能看出哪支是主要影片、哪支是變化影片。',
+      bullets: ['<code class="inline">W.video_info(path)</code> 回傳 fps / frames / duration_s / width / height', '<code class="inline">MAIN_CLIP</code> = main-weather-sunny.mp4 · <code class="inline">CHANGE_CLIP</code> = video2.mp4'],
+      out: 'main-weather-sunny.mp4  30fps  270 frames  9.0s  1280x720' },
+    { n: 61, type: 'code', title: '8.1 主要天氣預測（取樣 → 平均）',
+      why: '作業的關鍵要求：<b>整段至少每秒取樣一次，然後對機率向量取平均，報告平均值最大的類別</b>。這個要求不是隨便訂的 —— 見下面真實輸出的解讀。',
+      bullets: [
+        '<code class="inline">W.annotate_video(..., every_seconds=1.0)</code> 同時產出標註影片與統計資料',
+        '在兩次模型呼叫之間，最新預測<b>保留在畫面上（hold）</b>，因此每一個原始影格都不遺失',
+        '逐取樣點表格 + 平均後長條圖 + 標註影片輸出路徑',
+      ],
+      out: '9 個取樣點，間隔 1.0 秒\n平均：sunny 42.3% · snowy 37.0% · rainy 20.4% · overcast 0.3%\n→ 回報 main weather: sunny\n\n注：個別影格中，t=1s 與 t=8s 被判為 snowy（白色急流泡沫像雪），\n但整段平均後 sunny 勝出 —— 這正是作業要求「平均」而非單張判定的理由。' },
+    { n: 63, type: 'code', title: '8.2 主要天氣 Gradio 介面',
+      why: '接受影片，回傳標註影片 + 逐點表格 + 四類平均分數 + 摘要。',
+      bullets: [
+        '三個 guard clause：模型未訓練、未上傳影片、<code class="inline">interval < 1.0</code> 全部 raise <code class="inline">gr.Error</code>',
+        '<code class="inline">gr.Label(num_top_classes=4)</code> 顯示四個平均分數',
+        '<code class="inline">.launch()</code> 被註解掉，讓 notebook 保持無視窗執行（截圖另外補）',
+      ] },
+    { n: 65, type: 'code', title: '8.2b 介面煙霧測試',
+      why: 'launch 被註解掉就沒人測介面了，所以在這裡直接呼叫 callback。',
+      bullets: ['測空輸入被拒', '測 0.5 秒間隔被拒', '真實影片回傳 4 個物件，型別正確、檔案存在、分數總和 = 1'],
+      out: '空輸入已被 gr.Error 拒絕：請上傳一支影片。\n小於 1 秒的間隔已被 gr.Error 拒絕\n分數總和 = 1.0' },
+    { n: 67, type: 'code', title: '8.3 天氣變化預測（≤5 幀間隔）',
+      why: '作業要求對「每 N 個影格」推論，1 ≤ N ≤ 5。這裡用 <code class="inline">step_s = 5.0 / fps</code> 把幀數換成秒數。',
+      bullets: [
+        '<code class="inline">W.sample_frames()</code> → <code class="inline">W.predict_frames()</code> → 逐點 argmax',
+        '偵測<b>轉折點</b>：相鄰預測不同時記錄 <code class="inline">before → after at t</code>',
+        '再用 <code class="inline">annotate_video()</code> 產出變化版標註影片',
+      ],
+      out: '取樣 39 個影格，間隔 0.208 秒\n偵測到 10 次變化（例：sunny → snowy 於 t=5.21s）' },
+    { n: 69, type: 'code', title: '8.4 天氣變化 Gradio 介面',
+      why: '滑桿上限就是作業規定的 5，而且 callback 內<b>再檢查一次</b> —— UI 限制與程式邏輯限制是兩件事。',
+      bullets: ['<code class="inline">MAX_GAP_FRAMES = 5</code>', '<code class="inline">if not 1 <= gap <= 5: raise gr.Error(...)</code>', '回傳逐點表格 + 變化文字摘要'] },
+    { n: 71, type: 'code', title: '8.4b 變化介面煙霧測試',
+      why: '證明 1–5 的上限真的被強制執行，而且時間軸間距與影片一致。',
+      bullets: ['測 <code class="inline">0</code> 與 <code class="inline">6</code> 都被拒', '實測時間戳間距中位數 ≈ <code class="inline">5 / fps</code>'],
+      out: '0 個影格的間隔已被 gr.Error 拒絕\n6 個影格的間隔已被 gr.Error 拒絕' },
+  ],
+},
+{
+  id: 'ch9', num: 9, title: 'Six-Class Extension', zh: '六類別延伸',
+  range: 'cells 72 – 81',
+  lead: '把選定的方法延伸到另外兩個<b>視覺上可區分</b>的天氣狀況：foggy 與 lightning。',
+  why: '這一章證明前八章的設計是可延伸的 —— <b>管線完全沒改，只換了類別清單與輸出層大小</b>。這正是把類別順序集中寫成一份契約（cell 23）的回報。',
+  cells: [
+    { n: 73, type: 'code', title: '9.0 新類別計畫',
+      why: '選類別的標準不是「有趣」，而是「與現有四類可區分，且彼此可區分」。',
+      bullets: [
+        'foggy：對比被洗淡、沒有雨絲、遠處地標逐漸消失 → 混淆風險是 overcast，靠<b>能見度</b>而非亮度區分',
+        'lightning：暗色天空中的明亮分叉，或整片閃光 → 混淆風險是 overcast，只有看得到閃電才標 lightning',
+        '檢查六類都 ≥ 250 張',
+      ],
+      out: 'foggy 915 · lightning 309 · overcast 314 · rainy 287 · snowy 537 · sunny 341\n六個類別都已有 ≥ 250 張：True' },
+    { n: 75, type: 'code', title: '9.1 新類別定義',
+      why: '格式與 2.1 節完全相同（include / exclude），維持一致性。',
+      bullets: ['foggy exclude：晴天褐色霧霾或鏡頭眩光 → sunny；正在下雨 → rainy', 'lightning exclude：只有烏雲看不到閃光 → overcast；路燈或煙火'] },
+    { n: 77, type: 'code', title: '9.2 六類資料與訓練',
+      why: '完全重用同一套管線，只有類別清單變長。',
+      bullets: [
+        '<code class="inline">build_index(SIX)</code> → <b>覆寫</b> <code class="inline">image_index.csv</code>（因為 cell 13/15 寫的是四類版本，而登錄檔必須描述實際出貨的資料集）',
+        '<code class="inline">dedupe</code> → <code class="inline">make_split</code> → <code class="inline">save_split(..., "six_class_split.csv")</code>',
+        '<code class="inline">build_transfer_model(num_classes=6)</code> 重新建構（不是改最後一層），確保輸出層乾淨',
+        '訓練 20 epoch，存成 <code class="inline">mobilenet_v2_six.keras</code>，並寫出 <code class="inline">class_order_six.json</code>',
+      ],
+      out: '相異原圖：2,703 → 2,629\ntrain 2,104 / val 525' },
+    { n: 79, type: 'code', title: '9.3 六類結果與四類對比',
+      why: '把六類與四類放在同一張表，用<b>同一個指標</b>比較。',
+      bullets: ['<code class="inline">evaluate_model(six_model, six_val, SIX)</code>', '與 <code class="inline">results["mobilenet_v2"]</code> 併成兩列比較表'],
+      out: '六類準確率 0.9086 · macro F1 0.900\nsunny 0.883 · overcast 0.931 · rainy 0.812 · snowy 0.919 · foggy 0.919 · lightning 0.935\n→ 加了兩個類別，準確率只掉 0.6%，證明管線可延伸' },
+    { n: 81, type: 'code', title: '9.4 六類介面',
+      why: '作業要求「Gradio 的顯示也必須同步更新」，所以不只是訓練六類模型。',
+      bullets: [
+        '<code class="inline">predict_six()</code> 重用相同載入器與前處理，回傳六個具名分數',
+        '<code class="inline">gr.Label(num_top_classes=6)</code>',
+        '每類抽一張做示範表，顯示 expected / predicted / match / score',
+      ],
+      out: '正確：5 / 6' },
+  ],
+},
+];
+/* ══════════════════════════════════════════════════════════════════
+   weather_lib.py — 869 行 / 12 個功能域
+   ══════════════════════════════════════════════════════════════════ */
+const LIB_INTRO = {
+  title: '為什麼要有這個檔案',
+  body: 'notebook 保留<b>評分表要求看到</b>的部分（模型定義、訓練呼叫、圖表、評估）。所有重複性的工作都搬到這裡：資料夾掃描、近重複分組、train/val 分割、tf.data 管線、評估摘要、影片取樣與標註。',
+  notes: [
+    '<b>匯入時不碰網路</b>，因此資料集還在收集時 notebook 仍然可用。',
+    '<b>缺資料時丟 <code class="inline">DataNotReady</code></b>（一句話說明該做什麼），而不是原始 traceback。notebook 的 cell 先用 <code class="inline">require()</code> 擋掉，所以正常路徑下看到的是提示，不是例外。',
+    '<b>不改動磁碟</b> —— 除了輸出檔（index、split、模型、標註影片），<code class="inline">dedupe()</code> 只過濾索引，原始資料夾永遠保持你整理好的樣子。',
+  ],
+};
+
+const LIB = [
+{
+  id: 'g1', num: 1, title: '路徑與常數', range: 'L31 – L55',
+  lead: '所有輸出路徑與類別定義的單一來源。',
+  fns: [
+    { name: 'ROOT / DATA_ROOT / META_ROOT / SPLIT_ROOT / MODEL_ROOT / REPORT_ROOT / VIDEO_ROOT / CACHE_ROOT', line: 31, kind: '常數',
+      what: '八個路徑常數。資料在 <code class="inline">datasets/hand-filtered</code>，中繼資料在 <code class="inline">datasets/metadata</code>，分割在 <code class="inline">datasets/splits</code>，模型在 <code class="inline">models</code>，輸出影片在 <code class="inline">Reports</code>。',
+      why: 'notebook 每個 cell 都用 <code class="inline">W.META_ROOT / "x.csv"</code> 這種寫法，路徑只有一處定義。' },
+    { name: 'CLASS_ORDER / EXTRA_CLASSES / IMAGE_EXT', line: 40, kind: '常數',
+      what: '<code class="inline">["sunny","overcast","rainy","snowy"]</code>、<code class="inline">["foggy","lightning"]</code>、<code class="inline">{".jpg",".jpeg",".png",".bmp",".webp"}</code>。',
+      why: '<b class="hl">順序就是契約</b>。這個 list 的索引 = 模型輸出的索引。任何地方要類別清單都從這裡拿，六類就是 <code class="inline">CLASS_ORDER + EXTRA_CLASSES</code>。' },
+    { name: 'CLASS_MEANING', line: 44, kind: '常數',
+      what: '六個類別的文字定義（英文），第 2.1 / 9.1 節的 <code class="inline">brief</code> 欄直接引用。',
+      why: '定義只寫一次，notebook 表格與報告都引用同一份，不會出現兩處措辭不一致。' },
+  ],
+},
+{
+  id: 'g2', num: 2, title: '錯誤型別', range: 'L58 – L67',
+  lead: '一個自訂例外，用來表達「先收集或整理資料」。',
+  fns: [
+    { name: 'DataNotReady(RuntimeError)', line: 58, kind: '例外類別',
+      what: '在五種情況下被拋出：DATA_ROOT 下完全沒有圖片、一張圖被歸到兩個類別、某類別沒有驗證群組、分割檔不存在、cv2 打不開影片。',
+      why: '<b>訊息是一句人話，不是 traceback。</b>例如「一張圖被歸到不同類別，請先解決這些」。notebook 的 cell 不 catch 它 —— 讓它停在那裡並顯示該做什麼，比繼續跑出錯的數字好。' },
+  ],
+},
+{
+  id: 'g3', num: 3, title: '資料夾掃描', range: 'L73 – L138',
+  lead: '盤點每個類別有多少張圖，並區分「原始張數」與「相異張數」。',
+  fns: [
+    { name: 'class_dir(label)', line: 73, kind: '函式',
+      what: '回傳 <code class="inline">DATA_ROOT / label</code>。',
+      why: '只有一行，但讓「類別 → 資料夾」的規則也只有一處。' },
+    { name: 'list_images(label)', line: 77, kind: '函式',
+      what: '列出該類別資料夾下所有副檔名在 <code class="inline">IMAGE_EXT</code> 的檔案，排序後回傳。資料夾不存在時回傳空 list（<b>不拋錯</b>）。',
+      why: '回傳 <code class="inline">[]</code> 而不是例外，是為了讓 <code class="inline">require()</code> 能優雅地報告「這個類別還是空的」。' },
+    { name: 'scan_counts(labels, index)', line: 85, kind: '函式',
+      what: '每類一列：檔數、相異數、重複數、不同尺寸數、無法讀取數、是否達 250、計算基準。',
+      why: '<b>關鍵設計：</b>若傳入 <code class="inline">index</code>，<code class="inline">meets_250</code> 就用<b>相異數</b>判斷（作業要的是相異原圖）；否則用原始檔數並在 <code class="inline">basis</code> 欄註明「未去重」。<span class="hl">一個類別可以看起來滿了，其實全是副本。</span>' },
+    { name: 'counts_table(index, labels)', line: 125, kind: '函式',
+      what: '從 <code class="inline">scan_counts()</code> 取五欄，加上一列 <code class="inline">TOTAL</code>，成為報告用的表格。',
+      why: '報告要的是「raw → distinct → duplicates → 是否達標」這條敘事，多一列 TOTAL 讓總表可以直接貼進報告。' },
+  ],
+},
+{
+  id: 'g4', num: 4, title: '近重複偵測', range: 'L144 – L217',
+  lead: '三種雜湊 + 一個像素差異，解決「同一張照片的不同版本」與「不同照片但看起來一樣」兩種相反問題。',
+  fns: [
+    { name: '_ahash(path, size=8)', line: 144, kind: '私有',
+      what: '平均雜湊：轉灰階、縮成 8×8、與自身平均值比較，得到 64 個 bit。',
+      why: '對整體亮度與色彩分佈穩健 —— 縮圖、重新壓縮不會改變它。' },
+    { name: '_dhash(path, size=8)', line: 152, kind: '私有',
+      what: '差異雜湊：轉灰階、縮成 9×8，比較相鄰像素的左右梯度，得到 64 個 bit。',
+      why: '保留<b>結構</b>（左到右的明暗變化），補足 ahash 只看整體亮度的弱點。' },
+    { name: 'pixel_diff(a, b, size=64)', line: 160, kind: '函式',
+      what: '兩張圖縮成 64×64 灰階後的<b>平均絕對差</b>（0–255）。',
+      why: '<b class="hl">這是本檔案最重要的一行防禦。</b>純靠雜湊會把<b>不同的夜景照片</b>歸成一群 —— 一片黑天空加一個亮點，不管在哪條街拍，64 bit 幾乎一樣。實測：真重複落在 1–2，誤配對落在 20–90，所以這個第二道檢驗是決定性的。' },
+    { name: '_md5(path, chunk=1MB)', line: 179, kind: '私有',
+      what: '分塊計算 md5，避免大檔一次讀進記憶體。',
+      why: '抓<b>位元級完全相同</b>的副本 —— 這是最確定的一種，不需要模糊比對。' },
+    { name: 'hash_all(paths)', line: 192, kind: '函式',
+      what: '對每張圖算 md5 + ahash + dhash，結果快取在 <code class="inline">datasets/review-sheets/cache/image_hashes.json</code>，以 <b>路徑 + mtime</b> 為 key。',
+      why: '2,700 張圖算三次雜湊要幾分鐘，但只有<b>改過的檔案</b>需要重算。mtime 當版本號比檔案大小可靠。' },
+    { name: '_hamming(a, b)', line: 216, kind: '私有',
+      what: '兩個等長字串的漢明距離（不同字元的個數）。',
+      why: '雜湊相似度就是漢明距離 ≤ 門檻（預設 6 / 64 bit）。' },
+  ],
+},
+{
+  id: 'g5', num: 5, title: '索引與去重', range: 'L220 – L335',
+  lead: '把「哪些圖是同一張」變成一個可稽核的 CSV。',
+  fns: [
+    { name: 'build_index(labels, dup_threshold=6, dup_threshold_d=None, pixel_threshold=12.0)', line: 220, kind: '函式・核心',
+      what: '每張圖一列：<code class="inline">path / label / group / group_of / md5 / bytes</code>。<b>群組 id 是全域分配的</b>（<code class="inline">label_0001</code> 這種格式，但計數器跨類別共用）。',
+      why: '判定同組要同時滿足三個條件：<br>① md5 相同，<b>或</b><br>② ahash 與 dhash 的漢明距離都 ≤ 門檻，<b>而且</b><br>③ <code class="inline">pixel_diff ≤ 12</code><br><br>要求<b>兩個</b>雜湊都通過，避免「大片平坦天空、亮度相近」的照片塌成一個巨大群組（那會一次丟掉半個類別）；再要求像素差異，把剩下「只是雜湊撞到」的夜景配對刷掉。<br><br><span class="hl">群組 id 全域分配是刻意的</span>：一張被歸到兩個類別的圖仍然落在同一群組，因此在分割時<b>不可能</b>被拆到 train 和 val 兩邊。' },
+    { name: 'duplicate_report(index)', line: 279, kind: '函式',
+      what: '回傳「與至少一張其他圖同組」的所有列，依 group 排序並附上 group_size。',
+      why: '給人看細節用 —— 想知道某個群組裡到底有哪幾張。' },
+    { name: 'duplicate_summary(index)', line: 288, kind: '函式',
+      what: '四列統計：完全重複（md5）、僅近重複（hash 群組 > 1）、跨兩類的群組、去重後剩餘張數。',
+      why: '報告「移除了多少重複」時直接引用，不必自己算。' },
+    { name: 'cross_label_groups(index)', line: 304, kind: '函式',
+      what: '找出 <code class="inline">group</code> 對應到<b>超過一個 label</b> 的所有列。',
+      why: '<b class="hl">這是要人介入的情況。</b>同一張照片被放進 sunny 和 overcast，代表你的標註規則在某處矛盾 —— 程式不該自己選一個，應該停下來讓你決定。' },
+    { name: 'dedupe(index, enforce_distinct=True)', line: 311, kind: '函式・核心',
+      what: '每個群組只留一列，保留 <code class="inline">bytes</code> 最大的那張。磁碟上<b>不刪任何檔案</b>。若存在跨類群組且 <code class="inline">enforce_distinct</code> 為真，就先拋 <code class="inline">DataNotReady</code> 並列出前 5 個衝突。',
+      why: '為什麼保留最大的？同一張照片常見情況是「原始版 + 縮圖版」並存，保留解析度高的那張。<br><br>為什麼不刪檔？因為原始資料夾是你人工整理過的，程式不該動它；<code class="inline">image_index.csv</code> 同時保留原始列與去重後的代表列，可追溯。' },
+  ],
+},
+{
+  id: 'g6', num: 6, title: '訓練／驗證分割', range: 'L341 – L386',
+  lead: '以「群組」為單位、分層抽樣，並用 assert 保證不洩漏。',
+  fns: [
+    { name: 'make_split(index, val_fraction=0.2, seed=341)', line: 341, kind: '函式・核心',
+      what: '先算每個群組的大小與代表標籤，然後<b>逐類別</b>打亂群組順序，累加直到達該類別的驗證目標張數。',
+      why: '三個設計要點：<br>① <b>以群組為單位</b>，所以不會有副本跨兩側<br>② <b>逐類別</b>抽，所以每類都有驗證樣本（分層）<br>③ 抽樣時<b>累加的是張數不是群組數</b>，否則大群組會被低估<br><br>最後檢查每類都有驗證樣本；若某類只有一個群組，就<b>拋錯</b>而不是偷偷移動單列（移動單列會把群組拆到兩側）。' },
+    { name: 'save_split(split, name="four_class_split.csv")', line: 375, kind: '函式',
+      what: '寫到 <code class="inline">datasets/splits/</code> 並回傳路徑。',
+      why: '讓「這次用哪份分割」變成磁碟上的檔案，報告可以引用，也能重現。' },
+    { name: 'load_split(name="four_class_split.csv")', line: 382, kind: '函式',
+      what: '讀回分割 CSV；不存在就拋 <code class="inline">DataNotReady</code>。',
+      why: '分開的載入函式讓「重跑某個 cell」不需要重建整個索引。' },
+  ],
+},
+{
+  id: 'g7', num: 7, title: '前處理契約', range: 'L392 – L453',
+  lead: '把「每個模型的像素該怎麼縮放」變成一個不可變的物件。<b>這是本次修掉的第一個 bug 的解方。</b>',
+  fns: [
+    { name: 'PreprocessSpec（dataclass, frozen=True）', line: 392, kind: '資料類別',
+      what: '四個欄位：<code class="inline">name</code>、<code class="inline">image_size</code>、<code class="inline">scale</code>（文字描述）、<code class="inline">fn</code>（實際轉換函式）、<code class="inline">note</code>（給人看的說明）。',
+      why: '<code class="inline">frozen=True</code> 讓它不可變 —— 沒有人能中途改掉某個模型的前處理。<code class="inline">fn</code> 標註成 <code class="inline">Callable</code> 是為了讓 Pylance 不在每個呼叫點報「object is not callable」。' },
+    { name: '_identity / _rescale / _mobilenet_v2 / _efficientnet', line: 404, kind: '私有',
+      what: '四個候選的前處理函式：不變、除以 255、<code class="inline">mobilenet_v2.preprocess_input</code>（0..255 → −1..1）、<code class="inline">efficientnet.preprocess_input</code>。',
+      why: '<code class="inline">efficientnet</code> 留著但沒用 —— 註明「EfficientNet 在模型<b>內部</b>就重縮放了，不要再除以 255」，這個註解本身就是紀錄，避免未來有人換主幹時踩同一個坑。' },
+    { name: 'spec_for(kind)', line: 422, kind: '函式・核心',
+      what: '回傳對應的 <code class="inline">PreprocessSpec</code>。目前支援 <code class="inline">scratch</code>(128×128) / <code class="inline">mobilenet_v2</code>(224×224) / <code class="inline">efficientnet</code>。',
+      why: '<b class="hl">note 欄位是契約的文件化。</b>scratch 的 note 寫著：「模型不含縮放層，所以這個函式是<b>唯一</b>除以 255 的地方；make_dataset、predict_frames、Gradio callback 都呼叫它，其他任何地方都不得重複除法。」<br><br>mobilenet 的 note 寫著：「主幹<b>不含</b>縮放。這個函式是唯一套用 preprocess_input 的地方 —— 套兩次會把每個像素映射到約 −1.0。」' },
+  ],
+},
+{
+  id: 'g8', num: 8, title: 'tf.data 管線', range: 'L459 – L516',
+  lead: '從 split DataFrame 到可餵給 Keras 的批次，並保證前處理只發生一次。',
+  fns: [
+    { name: 'make_dataset(df, spec, batch_size=32, shuffle=False, augment=None, seed=341, labels=None)', line: 459, kind: '函式・核心',
+      what: '依序：<code class="inline">from_tensor_slices(paths, y)</code> → <code class="inline">map(_load)</code>（讀檔、解碼、resize、轉 float32）→ 選擇性 shuffle → 選擇性 augment → <b class="inline">map(spec.fn)</b> → <code class="inline">batch().prefetch()</code>。',
+      why: '三個關鍵設計：<br>① <b>順序</b>：augment 在 <code class="inline">spec.fn</code> <b>之前</b>，因為增強器是以 0..255 像素單位定義的（亮度 +0.12 才有物理意義）<br>② <b>單一縮放點</b>：<code class="inline">spec.fn</code> 是唯一縮放位置，docstring 明寫模型刻意不含 Rescaling / preprocess_input 層<br>③ <b>augment 的 batch 軸</b>：tf.data 一次給一張圖，但 Keras 的預處理層需要 batch 軸，所以 <code class="inline">expand_dims(0)</code> → 增強 → <code class="inline">squeeze(0)</code>' },
+    { name: 'dataset_summary(ds)', line: 503, kind: '函式',
+      what: '偷看一個批次，回傳 shape / dtype / min / max / 標籤集合。',
+      why: '<b>這是驗證前處理的第一個探針。</b>若 <code class="inline">images_max</code> 不是 1.0（scratch）或 1（mobilenet），就代表縮放出問題 —— 比訓練 40 epoch 後才發現省 40 倍時間。' },
+  ],
+},
+{
+  id: 'g9', num: 9, title: '資料增強', range: 'L522 – L622',
+  lead: '只造出「真實相機會拍到」的變化。',
+  fns: [
+    { name: 'make_augmenter(seed=341, strength=0.15)', line: 522, kind: '函式',
+      what: '回傳一個 <code class="inline">keras.Sequential</code>：水平翻轉、旋轉(0.15)、縮放(±10%)、亮度(0.12)、對比(0.15)、飽和度抖動(0.85–1.15)。',
+      why: '<b class="hl">刻意不做的事</b>：沒有垂直翻轉（會造出天空在地上的圖）、沒有色相旋轉（藍天不該變綠天）、裁切很輕（≤10%，否則雨絲與積雪這種細微特徵會被裁掉）。<br>縮放範圍取 −0.10 到 +0.10 而不是預設的 ±20%，理由同樣是保護細微證據。' },
+    { name: 'SaturationJitter（內部類別）', line: 536, kind: '內部類別',
+      what: '把飽和度乘上一個隨機因子（0.85–1.15），再 clip 到 0..255。<code class="inline">training=False</code> 時<b>原樣回傳</b>。',
+      why: '<b>Keras 3.1 沒有 RandomSaturation 層</b>，所以自己寫。<code class="inline">training</code> 旗標很重要 —— 推論時它必須是 no-op，否則同一張圖每次預測都不同。<code class="inline">get_config()</code> 有覆寫，模型才可序列化。' },
+    { name: 'raw_batch(df, image_size, n=8, seed)', line: 570, kind: '函式',
+      what: '取一小批 <b>0..255 的 float32</b> 圖片（尚未縮放）與對應的 DataFrame 列。',
+      why: '增強器是以像素單位定義的，所以預覽必須讀原始像素，否則亮度調整的幅度看起來會不對。' },
+    { name: 'sample_per_class(df, per_class=1, labels, seed)', line: 589, kind: '函式',
+      what: '每類各抽最多 <code class="inline">per_class</code> 列，依類別順序串接。',
+      why: '<b class="hl">為什麼不用 df.sample(n)？</b>docstring 算給你聽：四個均衡類別下抽 6 張，約 <b>62%</b> 的機率會漏掉至少一個類別，而作業要求「每個類別」都要有預覽 —— 漏一個就丟掉整個項目的分數。' },
+    { name: 'augment_preview(images, augmenter, rounds=1)', line: 613, kind: '函式',
+      what: '回傳原批次 + <code class="inline">rounds</code> 次獨立的增強抽樣。',
+      why: '兩次抽樣讓讀者看到增強的<b>隨機性</b>（裁切、翻轉、亮度都不同），而不是誤以為它是固定的確定性轉換。' },
+  ],
+},
+{
+  id: 'g10', num: 10, title: '評估', range: 'L628 – L658',
+  lead: '一次呼叫拿到所有評估所需的東西，避免每個 cell 重寫一遍。',
+  fns: [
+    { name: 'evaluate_model(model, ds, labels)', line: 628, kind: '函式・核心',
+      what: '跑完一次驗證集，回傳 dict：<code class="inline">accuracy</code>、<code class="inline">confusion_matrix</code>、<code class="inline">report</code>（sklearn 的 classification_report 字串）、<code class="inline">y_true</code>、<code class="inline">y_pred</code>、<code class="inline">y_prob</code>。',
+      why: '回傳<b>原始陣列</b>而不只是摘要，是為了讓 6.4 節能算 macro F1、找信心最高的錯誤、比較兩個變體 —— 同一次預測可以做好幾種分析，不必重跑模型。<code class="inline">zero_division=0</code> 避免某類別完全沒被預測時出現警告。' },
+    { name: 'confusion_table(cm, labels)', line: 653, kind: '函式',
+      what: '把混淆矩陣包成 DataFrame，index 為 <code class="inline">true_xxx</code>、columns 為 <code class="inline">pred_xxx</code>，並加一欄 <code class="inline">row_total</code>。',
+      why: '加 <code class="inline">row_total</code> 讓 recall 可以直接心算（對角線 ÷ row_total），不必另外算。' },
+  ],
+},
+{
+  id: 'g11', num: 11, title: '影片處理', range: 'L664 – L825',
+  lead: '取樣、批次預測、平均、標註 —— 作業第 8 章的全部機制。',
+  fns: [
+    { name: 'video_info(path)', line: 664, kind: '函式',
+      what: '回傳 fps / frames / duration_s / width / height。cv2 打不開就拋 <code class="inline">DataNotReady</code>。',
+      why: '「變化影片要用 ≤5 幀間隔」需要知道 fps 才能換算成秒，所以 fps 必須先取得。<b>cv2 有時回傳 0</b>，所以各處都寫 <code class="inline">or 30.0</code> 當後備。' },
+    { name: 'sample_frames(path, every_seconds=1.0, max_frames=None)', line: 681, kind: '函式',
+      what: '以固定間隔掃完整支影片，回傳 <code class="inline">[(timestamp, RGB frame), ...]</code>。',
+      why: '<code class="inline">step = max(1, round(fps * every_seconds))</code> —— 用 <b>max(1, ...)</b> 是因為間隔可能算成 0 幀，那會變成無限迴圈或每格都取。<br>回傳前做 <code class="inline">BGR→RGB</code>，因為 cv2 讀的是 BGR，而模型訓練用的是 RGB。' },
+    { name: 'predict_frames(model, frames, spec, batch_size=8)', line: 704, kind: '函式',
+      what: '把所有影格 resize 成 <code class="inline">spec.image_size</code>、套 <code class="inline">spec.fn</code>、批次預測，回傳 <code class="inline">(probs, timestamps)</code>。',
+      why: '<b class="inline">批次預測而不是逐格</b>：39 個影格逐格預測的 overhead 遠大於一次 8 張。同樣套 <code class="inline">spec.fn</code>，所以與訓練前處理完全一致。' },
+    { name: 'mean_probability / mean_scores / dominant_from_mean', line: 717, kind: '函式',
+      what: '<code class="inline">mean_probability</code>：逐欄平均。<code class="inline">mean_scores</code>：把平均向量轉成 <code class="inline">{類別: 機率}</code>。<code class="inline">dominant_from_mean</code>：回傳 <code class="inline">(最大平均的類別, 全部分數)</code>。',
+      why: '<b class="hl">這三個函式是作業要求的核心。</b>作業明文規定「對機率向量取平均，報告平均值最大的類別」—— 不是投票、不是取眾數，就是平均。<br><br>程式碼註解特別提到：<code class="inline">max(scores, key=...)</code> 要用索引取值，不能用 <code class="inline">dict.get</code>，因為 <code class="inline">dict.get</code> 回傳 <code class="inline">float | None</code>，而 <code class="inline">max()</code> 無法比較 None。' },
+    { name: 'CLASS_BGR', line: 740, kind: '常數',
+      what: '六個類別的 BGR 顏色（給 OpenCV 畫框用）。',
+      why: 'sunny 琥珀、overcast 灰、rainy 藍、snowy 白、foggy 米、lightning 亮黃 —— 讓標註影片一眼可讀。' },
+    { name: 'annotate_video(src, dst, model, spec, labels, every_seconds=1.0, hold_note="held")', line: 750, kind: '函式・核心',
+      what: '寫出標註版影片：每 <code class="inline">every_seconds</code> 秒做一次預測，畫出頂部半透明黑條 + 類別名 + 機率 + 機率長條 + 時間戳。<b>每一個原始影格都保留</b>，中間的影格顯示最近一次的預測。最後回傳 summary dict。',
+      why: '三個設計要點：<br>① <b>保留所有影格</b>，不是只輸出取樣點 —— 否則影片會變成幻燈片<br>② <b>「hold」機制</b> —— 提示文字寫 <code class="inline">(held)</code>，誠實表示這個標籤是幾格前的預測<br>③ 回傳的 summary 包含 <code class="inline">prob_matrix</code>（每次取樣一列）、<code class="inline">timestamps</code>、<code class="inline">timeline</code>、<code class="inline">mean_scores</code>、<code class="inline">main_label</code>，所以「變化偵測」與「主要天氣」可以用同一次執行得到<br><br>註解提到 <code class="inline">cv2.VideoWriter_fourcc</code> 存在於執行期但不在 stubs 裡，所以用 <code class="inline">getattr</code> 取值以保持型別檢查乾淨。' },
+  ],
+},
+{
+  id: 'g12', num: 12, title: '雜項', range: 'L831 – L869',
+  lead: '五個小工具，每個都對應一個實際需求。',
+  fns: [
+    { name: 'ensure_dirs()', line: 831, kind: '函式',
+      what: '一次建好五個輸出資料夾。',
+      why: 'notebook 第一個 cell 就呼叫，之後所有 <code class="inline">to_csv</code> / <code class="inline">save</code> 都不必先檢查目錄存在。' },
+    { name: 'save_json(obj, path) / load_json(path)', line: 836, kind: '函式',
+      what: '讀寫 JSON，寫入時自動建父目錄並用 <code class="inline">indent=2</code>、<code class="inline">default=str</code>。',
+      why: '<code class="inline">default=str</code> 讓 numpy 型別（<code class="inline">np.float32</code>）不會讓 <code class="inline">json.dumps</code> 爆掉 —— 這是實際踩過的問題。' },
+    { name: 'human_time(seconds)', line: 847, kind: '函式',
+      what: '把秒數轉成 <code class="inline">"8m 51s"</code> 這種格式。',
+      why: '訓練日誌裡「耗時 531 秒」不好讀，報告要寫「約 9 分鐘」。' },
+    { name: 'bits_of_training(histories)', line: 852, kind: '函式',
+      what: '每模型一列：<code class="inline">epochs_run</code>、<code class="inline">best_epoch</code>（val_loss 最小者）、最佳 epoch 的 train/val loss 與 val_acc、最終 train_acc、<code class="inline">overfit_gap</code>。',
+      why: '<b class="inline">best_epoch 用 argmin(val_loss)</b> 而不是 argmax(val_acc)，因為 checkpoint 與 early stopping 都以 val_loss 為準 —— 表格必須與實際存檔的權重一致。' },
+  ],
+},
+];
+
+      /* ══════════════════════════════════════════════════════════════════
+         關鍵原始碼片段（逐字取自檔案）
+         ══════════════════════════════════════════════════════════════════ */
+      const KEYCODE = {
+        2: `SEED = 341
+      os.environ["PYTHONHASHSEED"] = str(SEED)
+      random.seed(SEED)
+      np.random.seed(SEED)
+      tf.keras.utils.set_random_seed(SEED)
+
+      if str(Path.cwd()) not in sys.path:
+          sys.path.insert(0, str(Path.cwd()))   # nbconvert 的 cwd = notebook 目錄
+      import weather_lib as W
+
+      def require(classes=None, need=2):
+          classes = classes or W.CLASS_ORDER
+          have = [c for c in classes if W.list_images(c)]
+          missing = [c for c in classes if c not in have]
+          if missing:
+              print(f"[注意] 以下類別還沒有圖片：{', '.join(missing)}")
+          if len(have) < need:
+              return False
+          return True`,
+
+        21: `probe = np.array([0.0, 128.0, 255.0], dtype="float32").reshape(1, 1, 3)
+      for kind in ("scratch", "mobilenet_v2"):
+          out = np.asarray(W.spec_for(kind).fn(probe)).ravel().round(3)
+          print(f"{kind:13s} 0/128/255 -> {out}")
+
+      # 真實輸出：
+      # scratch       0/128/255 -> [0.    0.502 1.   ]
+      # mobilenet_v2  0/128/255 -> [-1.     0.004  1.   ]`,
+
+        35: `def build_scratch_cnn(num_classes=len(W.CLASS_ORDER), image_size=(128, 128)):
+          from keras import layers, models, regularizers
+
+          inputs = keras.Input(shape=(*image_size, 3), name="image")
+          # 不放 Rescaling：spec_for("scratch") 已在 tf.data 除以 255
+          # 不放 BatchNormalization：移動平均需 100 次更新才成熟，這裡每 epoch 只有 36 次
+          x = inputs                       # ← 這行不能省
+          for block, filters in enumerate((32, 64, 128, 128), start=1):
+              x = layers.Conv2D(filters, 3, padding="same",
+                                kernel_regularizer=regularizers.l2(1e-4),
+                                name=f"conv{block}")(x)
+              x = layers.Activation("relu", name=f"relu{block}")(x)
+              x = layers.MaxPooling2D(name=f"pool{block}")(x)
+
+          x = layers.GlobalAveragePooling2D(name="gap")(x)
+          x = layers.Dropout(0.4, name="drop")(x)
+          x = layers.Dense(128, activation="relu", name="dense")(x)
+          outputs = layers.Dense(num_classes, activation="softmax", name="weather")(x)
+          return models.Model(inputs, outputs, name="scratch_cnn")`,
+
+        37: `def build_transfer_model(num_classes=len(W.CLASS_ORDER), image_size=(224, 224),
+                               dropout=0.3):
+          base = keras.applications.MobileNetV2(
+              input_shape=(*image_size, 3), include_top=False, weights="imagenet")
+          base.trainable = False
+
+          # 不放 Lambda(preprocess_input)：
+          # spec_for("mobilenet_v2") 已在 tf.data 套用過，套兩次會壓到約 -1.0
+          inputs = keras.Input(shape=(*image_size, 3), name="image")
+          x = base(inputs, training=False)
+          x = layers.GlobalAveragePooling2D(name="gap")(x)
+          x = layers.Dropout(dropout, name="drop")(x)
+          outputs = layers.Dense(num_classes, activation="softmax", name="weather")(x)
+          return models.Model(inputs, outputs, name="mobilenet_v2_transfer")`,
+
+        45: `# 防護欄：同一份副本若同時出現在兩邊，下方每個數字都會偏樂觀
+      assert split["group"].is_unique, "分割中存在重複副本"
+      assert not set(train_df["group"]) & set(val_df["group"]), "群組洩漏"
+
+      def train_one(name, model, kind, epochs):
+          spec = W.spec_for(kind)
+          train_ds = W.make_dataset(train_df, spec, CONFIG["batch_size"],
+                                    shuffle=True, augment=augmenter)
+          val_ds = W.make_dataset(val_df, spec, CONFIG["batch_size"])
+          started = time.time()
+          hist = model.fit(train_ds, validation_data=val_ds, epochs=epochs,
+                           callbacks=callbacks_for(name), verbose=2)
+          seconds = time.time() - started
+          print(f"{name}：訓練了 {len(hist.history['loss'])} 個 epoch，耗時",
+                W.human_time(seconds))
+          return hist, seconds, val_ds
+
+      histories["scratch_cnn"], trained["scratch_cnn"], VAL_DS["scratch_cnn"] = train_one(
+          "scratch_cnn", scratch_model, "scratch", CONFIG["epochs_scratch"])
+      histories["mobilenet_v2"], trained["mobilenet_v2"], VAL_DS["mobilenet_v2"] = train_one(
+          "mobilenet_v2", transfer_model, "mobilenet_v2", CONFIG["epochs_transfer"])`,
+
+        61: `out_main = W.REPORT_ROOT / "main-weather-annotated.mp4"
+      summary = W.annotate_video(MAIN_CLIP, out_main, deployed_model, deployed_spec,
+                                 labels=W.CLASS_ORDER, every_seconds=1.0)
+
+      mean = pd.Series(summary["mean_scores"]).sort_values(ascending=False)
+      print("回報的主要天氣：", summary["main_label"],
+            f"（平均 {mean.iloc[0] * 100:.1f}%）")
+
+      # 真實輸出：sunny 42.3% / snowy 37.0% / rainy 20.4% / overcast 0.3%`,
+
+        77: `six_index = W.build_index(SIX)
+      six_index.to_csv(W.META_ROOT / "image_index.csv", index=False)  # 覆寫四類版本
+
+      six_dedup = W.dedupe(six_index)
+      six_split = W.make_split(six_dedup, val_fraction=0.2, seed=SEED)
+      W.save_split(six_split, "six_class_split.csv")
+
+      six_train = W.make_dataset(six_split[six_split["split"] == "train"],
+                                 W.spec_for("mobilenet_v2"), 32, shuffle=True,
+                                 augment=augmenter, labels=SIX)
+      six_model = build_transfer_model(num_classes=len(SIX))   # 重建，不是改最後一層
+      six_model.fit(six_train, validation_data=six_val, epochs=20,
+                    callbacks=callbacks_for("mobilenet_v2_six"), verbose=2)`,
+
+        lib_make_dataset: `def make_dataset(df, spec, batch_size=32, shuffle=False,
+                       augment=None, seed=341, labels=None):
+          paths = df["path"].astype(str).to_numpy()
+          y = np.array([label_to_id[label] for label in df["label"]], dtype=np.int32)
+          ds = tf.data.Dataset.from_tensor_slices((paths, y))
+
+          def _load(path, label):
+              raw = tf.io.read_file(path)
+              img = tf.io.decode_image(raw, channels=3, expand_animations=False)
+              img = tf.image.resize(img, spec.image_size, method="bilinear")
+              return tf.cast(img, tf.float32), label
+
+          ds = ds.map(_load, num_parallel_calls=tf.data.AUTOTUNE)
+          if shuffle:
+              ds = ds.shuffle(min(len(df), 2000), seed=seed, reshuffle_each_iteration=True)
+          if augment is not None:
+              def _augment(x, y_):
+                  batched = tf.expand_dims(x, 0)          # Keras 預處理層需要 batch 軸
+                  out = augment(batched, training=True)
+                  return tf.squeeze(out, 0), y_
+              ds = ds.map(_augment, num_parallel_calls=tf.data.AUTOTUNE)
+          ds = ds.map(lambda x, y_: (spec.fn(x), y_),   # ← 唯一的縮放點
+                      num_parallel_calls=tf.data.AUTOTUNE)
+          return ds.batch(batch_size).prefetch(tf.data.AUTOTUNE)`,
+
+        lib_build_index: `for path, label in paths:
+          info = hashes.get(str(path), {})
+          group = None
+          if info.get("md5"):
+              group = by_md5.get(info["md5"])          # ① 位元級完全相同
+          if group is None and info.get("ahash"):
+              for rep in reps:
+                  if (_hamming(info["ahash"], rep["a"]) <= dup_threshold
+                                  and _hamming(info["dhash"], rep["d"]) <= dup_threshold_d
+                                  and pixel_diff(path, rep["path"]) <= pixel_threshold):
+                      group = rep["group"]             # ② 雙雜湊 + ③ 像素差異
+                      break
+          if group is None:
+              counters[label] = counters.get(label, 0) + 1
+              group = f"{label}_{counters[label]:04d}"  # 全域分配 → 跨類也不會被拆開
+              reps.append({..., "group": group, "path": path})`,
+      };
+
+      /* ══════════════════════════════════════════════════════════════════
+         應用程式
+         ══════════════════════════════════════════════════════════════════ */
+      const $ = (s, r = document) => r.querySelector(s);
+      const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+      /* ---------- 小型 SVG 折線圖 ---------- */
+      function lineChart(host, cfg) {
+        const series = cfg.series;
+        const n = Math.max(...series.map(s => s.data.length));
+        const W = 780, H = cfg.height || 260;
+        const P = { l: 46, r: 16, t: 18, b: 34 };
+        const iw = W - P.l - P.r, ih = H - P.t - P.b;
+        const yMin = cfg.yMin != null ? cfg.yMin : 0;
+        const yMax = cfg.yMax != null ? cfg.yMax : 1;
+        const x = i => P.l + (n <= 1 ? 0 : (i / (n - 1)) * iw);
+        const y = v => P.t + ih - ((v - yMin) / (yMax - yMin)) * ih;
+
+        const grid = [0, .25, .5, .75, 1].map(f => {
+          const val = yMin + (yMax - yMin) * f;
+          return `<line x1="${P.l}" y1="${y(val).toFixed(1)}" x2="${W - P.r}" y2="${y(val).toFixed(1)}"
+                    stroke="#1c2740" stroke-width="1"/>
+                  <text x="${P.l - 8}" y="${(y(val) + 4).toFixed(1)}" text-anchor="end"
+                    fill="#5b7096" font-size="10" font-family="monospace">${val.toFixed(2)}</text>`;
+        }).join('');
+
+        const xTicks = [];
+        for (let i = 0; i < n; i += Math.max(1, Math.ceil(n / 10))) {
+          xTicks.push(`<text x="${x(i).toFixed(1)}" y="${H - 12}" text-anchor="middle"
+            fill="#5b7096" font-size="10" font-family="monospace">${i + 1}</text>`);
+        }
+
+        const paths = series.map(s => {
+          const d = s.data.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+          return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2}"
+                    stroke-linejoin="round" stroke-linecap="round" opacity="${s.opacity ?? 1}">
+                    <animate attributeName="stroke-dasharray" from="0,2000" to="2000,0" dur="0.6s" fill="freeze"/>
+                  </path>`;
+        }).join('');
+
+        const dots = series.map(s => s.data.map((v, i) =>
+          `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="#0d1424"
+             stroke="${s.color}" stroke-width="1.6"/>`).join('')).join('');
+
+        const marker = cfg.mark
+          ? `<line x1="${x(cfg.mark - 1).toFixed(1)}" y1="${P.t}" x2="${x(cfg.mark - 1).toFixed(1)}"
+               y2="${P.t + ih}" stroke="${cfg.markColor || '#fbbf24'}" stroke-width="1"
+               stroke-dasharray="4 4" opacity=".55"/>
+             <text x="${x(cfg.mark - 1).toFixed(1)}" y="${P.t - 4}" text-anchor="middle"
+               fill="${cfg.markColor || '#fbbf24'}" font-size="10">best ep ${cfg.mark}</text>`
+          : '';
+
+        host.innerHTML = `
+          <svg viewBox="0 0 ${W} ${H}" class="w-full" style="max-height:${H}px">
+            ${grid}${paths}${dots}${marker}${xTicks.join('')}
+            <text x="${W / 2}" y="${H - 1}" text-anchor="middle" fill="#465a7d" font-size="10">epoch</text>
+          </svg>
+          <div class="mt-2 flex flex-wrap items-center gap-3 text-[11px]">
+            ${series.map(s => `<span class="flex items-center gap-1.5 text-slate-400">
+              <span class="inline-block h-0.5 w-4 rounded" style="background:${s.color}"></span>${s.label}</span>`).join('')}
+          </div>`;
+      }
+
+      /* ---------- 橫向長條圖 ---------- */
+      function barChart(host) {
+        const rows = DATASET;
+        const max = Math.max(...rows.map(r => r.files));
+        host.innerHTML = `<div class="space-y-2.5">` + rows.map(r => `
+          <div class="group">
+            <div class="mb-1 flex items-baseline justify-between text-[11.5px]">
+              <span class="font-mono text-slate-300">${r.label}</span>
+              <span class="text-slate-500">${r.files} 張 <span class="text-slate-700">·</span> train ${r.train} / val ${r.val}</span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-slate-800/70">
+              <div class="h-full rounded-full transition-all duration-700"
+                   style="width:${(r.files / max * 100).toFixed(1)}%;background:linear-gradient(90deg,${r.color}55,${r.color})"></div>
+            </div>
+          </div>`).join('') + `</div>
+          <p class="mt-3 text-[11px] text-slate-600">總計 2,703 張原始 → 去重後 2,629 張。每類皆達作業要求的 250 張相異原圖下限。</p>`;
+      }
+
+      /* ---------- 渲染 KPI ---------- */
+      function renderKPI() {
+        $('#nb-kpi').innerHTML = KPI.map(k => {
+          const c = k.tone === 'sky' ? 'text-sky' : 'text-sun';
+          const ring = k.tone === 'sky' ? 'glow-sky' : 'glow-sun';
+          return `<div class="card ${ring} rounded-xl px-4 py-3">
+            <p class="text-[10.5px] uppercase tracking-wider text-slate-500">${k.k}</p>
+            <p class="mt-1 text-xl font-bold ${c}">${k.v}</p>
+            <p class="text-[10.5px] text-slate-600">${k.s}</p>
+          </div>`;
+        }).join('');
+      }
+
+      /* ---------- 渲染 notebook ---------- */
+      function renderNB() {
+        $('#nb-nav').innerHTML = NB.map(ch => `
+          <button data-goto="${ch.id}" class="nav-btn w-full rounded-r-md px-3 py-2 text-left text-[12.5px] text-slate-400">
+            <span class="mr-1.5 font-mono text-[10px] text-slate-600">0${ch.num}</span>${ch.zh}
+          </button>`).join('');
+
+        $('#nb-content').innerHTML = NB.map(ch => `
+          <section id="${ch.id}" data-search="${esc((ch.title + ch.zh + ch.lead + ch.why + ch.cells.map(c => c.title + c.body + (c.why || '') + (c.bullets || []).join('')).join('')).toLowerCase())}"
+            class="fade-in scroll-mt-32">
+            <div class="mb-4 flex flex-wrap items-end gap-x-4 gap-y-1">
+              <span class="grid h-9 w-9 place-items-center rounded-lg bg-sky/12 text-[13px] font-bold text-sky ring-1 ring-sky/25">${ch.num}</span>
+              <h2 class="text-lg font-semibold text-slate-100">${ch.title}</h2>
+              <span class="text-[13px] text-slate-500">${ch.zh}</span>
+              <span class="ml-auto rounded-md border border-line px-2 py-0.5 font-mono text-[10.5px] text-slate-500">${ch.range}</span>
+            </div>
+            <p class="mb-3 text-[13.5px] leading-relaxed text-slate-300">${ch.lead}</p>
+            <div class="mb-5 rounded-lg border-l-2 border-sun/60 bg-sun/[.045] px-4 py-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wider text-sun/80">為什麼需要這一章</p>
+              <p class="mt-1 text-[12.5px] leading-relaxed text-slate-400">${ch.why}</p>
+            </div>
+            <div class="space-y-3">
+              ${ch.cells.map(c => cellCard(c, ch)).join('')}
+            </div>
+          </section>`).join('');
+
+        // 圖表插入
+        const curves = document.getElementById('chart-curves');
+        if (curves) {
+          let mode = 'val';
+          const draw = () => {
+            const all = {
+              val: [
+                { label: 'scratch_cnn 驗證', color: '#fbbf24', data: HIST.scratch.val },
+                { label: 'mobilenet_v2 驗證', color: '#38bdf8', data: HIST.mobilenet.val },
+              ],
+              train: [
+                { label: 'scratch_cnn 訓練', color: '#fbbf24', data: HIST.scratch.train, opacity: .85 },
+                { label: 'mobilenet_v2 訓練', color: '#38bdf8', data: HIST.mobilenet.train, opacity: .85 },
+              ],
+              both: [
+                { label: 'scratch 訓練', color: '#fbbf24', data: HIST.scratch.train, opacity: .45, width: 1.5 },
+                { label: 'scratch 驗證', color: '#fbbf24', data: HIST.scratch.val },
+                { label: 'mobilenet 訓練', color: '#38bdf8', data: HIST.mobilenet.train, opacity: .45, width: 1.5 },
+                { label: 'mobilenet 驗證', color: '#38bdf8', data: HIST.mobilenet.val },
+              ],
+            };
+            lineChart(curves, { series: all[mode], yMin: 0.35, yMax: 1.0, height: 250,
+              mark: mode === 'val' ? 15 : null, markColor: '#38bdf8' });
+            $$('#curve-tabs button').forEach(b => {
+              const on = b.dataset.mode === mode;
+              b.className = `rounded-md px-2.5 py-1 text-[11px] transition ${on
+                ? 'bg-sky/15 text-sky ring-1 ring-sky/40'
+                : 'text-slate-500 hover:text-slate-300'}`;
+            });
+          };
+          $$('#curve-tabs button').forEach(b => b.onclick = () => { mode = b.dataset.mode; draw(); });
+          draw();
+        }
+
+        const ds = document.getElementById('chart-dataset');
+        if (ds) barChart(ds);
+      }
+
+      function cellCard(c, ch) {
+        const isCode = c.type === 'code';
+        const badge = isCode
+          ? '<span class="rounded bg-sky/15 px-1.5 py-0.5 font-mono text-[10px] text-sky ring-1 ring-sky/25">程式碼</span>'
+          : '<span class="rounded bg-slate-500/15 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 ring-1 ring-slate-500/25">說明</span>';
+
+        const code = KEYCODE[c.n];
+
+        return `<article class="card rounded-xl overflow-hidden" data-search="${esc((c.title + (c.body || '') + (c.why || '') + (c.bullets || []).join('') + (c.out || '')).toLowerCase())}">
+          <div class="flex flex-wrap items-center gap-2 border-b border-line/60 px-4 py-2.5">
+            <span class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10.5px] text-slate-400">Cell ${c.n}</span>
+            ${badge}
+            <h3 class="text-[13.5px] font-semibold text-slate-200">${c.title}</h3>
+          </div>
+          <div class="px-4 py-3">
+            ${c.body ? `<p class="text-[12.5px] leading-relaxed text-slate-400">${c.body}</p>` : ''}
+            ${c.why ? `<p class="mt-2 text-[12.5px] leading-relaxed text-slate-300"><span class="mr-1 text-sky">▸</span>${c.why}</p>` : ''}
+            ${c.bullets ? `<ul class="mt-2.5 space-y-1.5">${c.bullets.map(b =>
+              `<li class="flex gap-2 text-[12px] leading-relaxed text-slate-400">
+                 <span class="mt-[3px] h-1 w-1 shrink-0 rounded-full bg-slate-600"></span>
+                 <span class="min-w-0">${b}</span></li>`).join('')}</ul>` : ''}
+            ${c.chart === 'curves' ? `
+              <div class="mt-4 rounded-lg border border-line/70 bg-sunk/60 p-3">
+                <div class="mb-2 flex items-center gap-2">
+                  <p class="text-[10.5px] uppercase tracking-wider text-slate-500">驗證曲線（真實數據）</p>
+                  <div id="curve-tabs" class="ml-auto flex gap-1">
+                    <button data-mode="val">驗證</button>
+                    <button data-mode="train">訓練</button>
+                    <button data-mode="both">兩者</button>
+                  </div>
+                </div>
+                <div id="chart-curves"></div>
+              </div>` : ''}
+            ${c.n === 11 ? `
+              <div class="mt-4 rounded-lg border border-line/70 bg-sunk/60 p-3">
+                <p class="mb-3 text-[10.5px] uppercase tracking-wider text-slate-500">各類別張數（真實數據）</p>
+                <div id="chart-dataset"></div>
+              </div>` : ''}
+            ${c.out ? `<div class="mt-3 rounded-lg border border-line/60 bg-[#060a13] px-3 py-2">
+              <p class="mb-1 text-[10px] uppercase tracking-wider text-slate-600">真實執行輸出</p>
+              <pre class="code overflow-x-auto text-[11.5px] leading-relaxed text-emerald-300/85">${esc(c.out)}</pre>
+            </div>` : ''}
+            ${code ? `<details class="mt-3 rounded-lg border border-line/60 bg-[#060a13]">
+              <summary class="flex items-center gap-2 px-3 py-2 text-[11.5px] text-slate-500 hover:text-slate-300">
+                <span class="chev text-[9px] text-sky">▶</span>關鍵原始碼
+              </summary>
+              <pre class="code overflow-x-auto border-t border-line/50 px-3 py-2.5 text-[11.5px] leading-relaxed text-slate-300">${esc(code)}</pre>
+            </details>` : ''}
+          </div>
+        </article>`;
+      }
+
+      /* ---------- 渲染 weather_lib ---------- */
+      function renderLIB() {
+        $('#lib-intro').innerHTML = `
+          <div class="card rounded-xl p-5">
+            <div class="flex flex-wrap items-center gap-3">
+              <span class="font-mono text-[13px] text-slate-200">weather_lib.py</span>
+              <span class="rounded-md border border-line px-2 py-0.5 font-mono text-[10.5px] text-slate-500">869 行 · 12 功能域 · 40 個名稱</span>
+            </div>
+            <p class="mt-3 text-[13px] leading-relaxed text-slate-300">${LIB_INTRO.body}</p>
+            <div class="mt-3 space-y-1.5">
+              ${LIB_INTRO.notes.map(n => `<p class="flex gap-2 text-[12px] leading-relaxed text-slate-400">
+                <span class="mt-[3px] h-1 w-1 shrink-0 rounded-full bg-sun/70"></span><span>${n}</span></p>`).join('')}
+            </div>
+            <div class="mt-4 rounded-lg border border-line/70 bg-sunk/60 p-3">
+              <p class="mb-2 text-[10.5px] uppercase tracking-wider text-slate-500">資料流：notebook → 程式庫 → 產出</p>
+              <svg viewBox="0 0 760 130" class="w-full">
+                <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#3d5278"/></marker></defs>
+                ${[
+                  ['project1.ipynb', 10, '#38bdf8'],
+                  ['scan / index / dedupe', 150, '#8ab4f8'],
+                  ['make_split', 320, '#8ab4f8'],
+                  ['make_dataset + spec.fn', 450, '#fbbf24'],
+                  ['model.fit', 620, '#a5c9e8'],
+                ].map(([t, x, col], i) => `
+                  <rect x="${x}" y="34" width="${i === 0 ? 120 : i === 3 ? 158 : 150}" height="34" rx="8"
+                    fill="${col}14" stroke="${col}55"/>
+                  <text x="${x + (i === 0 ? 60 : i === 3 ? 79 : 75)}" y="55" text-anchor="middle"
+                    fill="${col}" font-size="10.5" font-family="monospace">${t}</text>
+                  ${i < 4 ? `<line x1="${x + (i === 0 ? 120 : i === 3 ? 158 : 150)}" y1="51"
+                    x2="${[150, 320, 450, 620][i] - 6}" y2="51" stroke="#3d5278" stroke-width="1.2"
+                    marker-end="url(#ar)"/>` : ''}
+                `).join('')}
+                <text x="380" y="96" text-anchor="middle" fill="#465a7d" font-size="10">
+                  縮放只發生在 spec.fn 一處 · 模型內不含 Rescaling / preprocess_input</text>
+                <text x="380" y="114" text-anchor="middle" fill="#465a7d" font-size="10">
+                  輸出 → image_index.csv · *_split.csv · *.keras · history.json · Reports/*.mp4</text>
+              </svg>
+            </div>
+          </div>`;
+
+        $('#lib-nav').innerHTML = LIB.map(g => `
+          <button data-goto="${g.id}" class="nav-btn w-full rounded-r-md px-3 py-2 text-left text-[12.5px] text-slate-400">
+            <span class="mr-1.5 font-mono text-[10px] text-slate-600">${String(g.num).padStart(2, '0')}</span>${g.title}
+          </button>`).join('');
+
+        $('#lib-content').innerHTML = LIB.map(g => `
+          <section id="${g.id}" class="fade-in scroll-mt-32"
+      data-search="${esc((g.title + g.lead + g.fns.map(f => f.name + f.what + f.why + f.kind).join('')).toLowerCase())}">
+            <div class="mb-3 flex flex-wrap items-end gap-x-4 gap-y-1">
+              <span class="grid h-9 w-9 place-items-center rounded-lg bg-sun/12 text-[13px] font-bold text-sun ring-1 ring-sun/25">${g.num}</span>
+              <h2 class="text-lg font-semibold text-slate-100">${g.title}</h2>
+              <span class="ml-auto rounded-md border border-line px-2 py-0.5 font-mono text-[10.5px] text-slate-500">${g.range}</span>
+            </div>
+            <p class="mb-3 text-[13px] leading-relaxed text-slate-400">${g.lead}</p>
+            <div class="space-y-2.5">
+              ${g.fns.map(f => {
+                const code = (f.name.startsWith('make_dataset') ? KEYCODE.lib_make_dataset
+                           : f.name.startsWith('build_index') ? KEYCODE.lib_build_index : null);
+                return `<article class="card rounded-xl overflow-hidden" data-search="${esc((f.name + f.what + f.why + f.kind).toLowerCase())}">
+                  <div class="flex flex-wrap items-center gap-2 border-b border-line/60 px-4 py-2.5">
+                    <span class="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">L${f.line}</span>
+                    <span class="rounded bg-sun/12 px-1.5 py-0.5 text-[10px] text-sun/90 ring-1 ring-sun/20">${f.kind}</span>
+                    <code class="text-[12.5px] font-semibold text-slate-200">${esc(f.name)}</code>
+                  </div>
+                  <div class="px-4 py-3">
+                    <p class="text-[12.5px] leading-relaxed text-slate-400">${f.what}</p>
+                    <p class="mt-2 text-[12.5px] leading-relaxed text-slate-300"><span class="mr-1 text-sun">▸</span>${f.why}</p>
+                    ${code ? `<details class="mt-3 rounded-lg border border-line/60 bg-[#060a13]">
+                      <summary class="flex items-center gap-2 px-3 py-2 text-[11.5px] text-slate-500 hover:text-slate-300">
+                        <span class="chev text-[9px] text-sun">▶</span>關鍵原始碼
+                      </summary>
+                      <pre class="code overflow-x-auto border-t border-line/50 px-3 py-2.5 text-[11.5px] leading-relaxed text-slate-300">${esc(code)}</pre>
+                    </details>` : ''}
+                  </div>
+                </article>`; }).join('')}
+            </div>
+          </section>`).join('');
+      }
+
+      /* ---------- 分頁切換 ---------- */
+      let currentTab = 'nb';
+      function setTab(tab) {
+        currentTab = tab;
+        $('#tab-nb').classList.toggle('hidden', tab !== 'nb');
+        $('#tab-lib').classList.toggle('hidden', tab !== 'lib');
+        $$('#tabs .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        $('#search').placeholder = tab === 'nb'
+          ? '搜尋章節、cell、關鍵字…（按 / 聚焦）'
+          : '搜尋函式名、功能域、關鍵字…（按 / 聚焦）';
+        doSearch($('#search').value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      /* ---------- 搜尋 ---------- */
+      function doSearch(q) {
+        const term = (q || '').trim().toLowerCase();
+        const root = currentTab === 'nb' ? $('#nb-content') : $('#lib-content');
+        const sections = $$('section', root);
+
+        if (!term) {
+          $$('[data-search]', root).forEach(el => el.classList.remove('hidden'));
+          $('#searchCount').textContent = '';
+          return;
+        }
+
+        let hits = 0;
+        sections.forEach(s => {
+          const sectionHit = (s.dataset.search || '').includes(term);
+          let anyCard = false;
+          $$('article', s).forEach(c => {
+            const hit = sectionHit || (c.dataset.search || '').includes(term);
+            c.classList.toggle('hidden', !hit);
+            if (hit) { anyCard = true; hits++; }
+          });
+          s.classList.toggle('hidden', !anyCard);
+        });
+        $('#searchCount').textContent = hits ? `${hits} 項符合` : '無結果';
+      }
+
+      /* ---------- 側欄導覽 ---------- */
+      function bindNav() {
+        document.addEventListener('click', (e) => {
+          const tb = e.target.closest('#tabs .tab-btn');
+          if (tb) { setTab(tb.dataset.tab); return; }
+
+          const nb = e.target.closest('[data-goto]');
+          if (nb) {
+            const el = document.getElementById(nb.dataset.goto);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $$('.nav-btn').forEach(b => b.classList.toggle('active', b === nb));
+            return;
+          }
+        });
+      }
+
+      /* ---------- 滾動時高亮側欄 ---------- */
+      function bindScrollSpy() {
+        const map = { nb: NB.map(c => c.id), lib: LIB.map(g => g.id) };
+        window.addEventListener('scroll', () => {
+          const ids = map[currentTab] || [];
+          let active = ids[0];
+          for (const id of ids) {
+            const el = document.getElementById(id);
+            if (el && el.getBoundingClientRect().top <= 180) active = id;
+          }
+          $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.goto === active));
+        }, { passive: true });
+      }
+
+      /* ---------- 鍵盤 ---------- */
+      function bindKeys() {
+        document.addEventListener('keydown', (e) => {
+          const inInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+          if (e.key === '/' && !inInput) { e.preventDefault(); $('#search').focus(); return; }
+          if (e.key === 'Escape') { $('#search').value = ''; doSearch(''); $('#search').blur(); return; }
+          if (inInput) return;
+          if (e.key === '1') setTab('nb');
+          if (e.key === '2') setTab('lib');
+        });
+        $('#search').addEventListener('input', (e) => doSearch(e.target.value));
+      }
+
+      /* ---------- 啟動 ---------- */
+      renderKPI();
+      renderNB();
+      renderLIB();
+      bindNav();
+      bindScrollSpy();
+      bindKeys();
+      setTab('nb');
+      $('#search').value = '';
+      $('#searchCount').textContent = '';
+
+      // 初次進入時側欄高亮第一章
+      $$('.nav-btn').forEach(b => b.classList.remove('active'));
+      $$('#nb-nav .nav-btn')[0]?.classList.add('active');
+</script>
+</body>
+</html>
