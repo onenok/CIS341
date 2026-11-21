@@ -1,0 +1,126 @@
+{
+ "history": {
+  "accuracy": [
+   0.680889,
+   0.760889,
+   0.776,
+   0.796444,
+   0.794667,
+   0.821333,
+   0.838222
+  ],
+  "loss": [
+   0.851318,
+   0.647701,
+   0.632315,
+   0.562315,
+   0.545074,
+   0.523907,
+   0.490776
+  ],
+  "val_accuracy": [
+   0.207143,
+   0.207143,
+   0.207143,
+   0.207143,
+   0.207143,
+   0.207143,
+   0.235714
+  ],
+  "val_loss": [
+   1.519783,
+   1.690707,
+   1.93505,
+   2.091146,
+   2.304125,
+   2.629913,
+   2.244174
+  ],
+  "learning_rate": [
+   0.001,
+   0.001,
+   0.001,
+   0.001,
+   0.0005,
+   0.0005,
+   0.0005
+  ]
+ },
+ "config": {
+  "seed": 341,
+  "batch_size": 32,
+  "epochs_cap": 40,
+  "patience": 6,
+  "learning_rate": 0.001,
+  "epochs_run": 7,
+  "seconds": 149.7,
+  "inner_rescaling": "Rescaling(1/255) inside the model",
+  "outer_scaling": "spec_for('scratch').fn divides by 255",
+  "batchnorm": "one BatchNormalization after every conv"
+ },
+ "class_order": [
+  "sunny",
+  "overcast",
+  "rainy",
+  "snowy"
+ ],
+ "val_size": 280,
+ "pred_counts": {
+  "sunny": 0,
+  "overcast": 280,
+  "rainy": 0,
+  "snowy": 0
+ },
+ "accuracy": 0.2071,
+ "majority_class": "snowy",
+ "majority_baseline": 0.3821,
+ "per_class_recall": {
+  "sunny": 0.0,
+  "overcast": 1.0,
+  "rainy": 0.0,
+  "snowy": 0.0
+ },
+ "confusion": [
+  [
+   0,
+   63,
+   0,
+   0
+  ],
+  [
+   0,
+   58,
+   0,
+   0
+  ],
+  [
+   0,
+   52,
+   0,
+   0
+  ],
+  [
+   0,
+   107,
+   0,
+   0
+  ]
+ ],
+ "distinct_pred_classes": 1,
+ "max_prob_mean": 0.4028,
+ "max_prob_min": 0.4014,
+ "max_prob_max": 0.4036,
+ "mean_prob_vector": {
+  "sunny": 0.1258,
+  "overcast": 0.4028,
+  "rainy": 0.2367,
+  "snowy": 0.2348
+ },
+ "epochs_run": 7,
+ "true_counts": {
+  "sunny": 63,
+  "overcast": 58,
+  "rainy": 52,
+  "snowy": 107
+ }
+}

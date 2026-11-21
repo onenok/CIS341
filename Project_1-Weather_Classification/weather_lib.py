@@ -499,6 +499,47 @@ def spec_for(kind: str) -> PreprocessSpec:
     raise ValueError(f"unknown preprocessing kind: {kind}")
 
 
+def to_model_input(images, image_size: tuple[int, int]) -> np.ndarray:
+    """Resize exactly like the training pipeline, then return float32 pixels.
+
+    `make_dataset` resizes with `tf.image.resize(..., method="bilinear")`. The
+    inference helpers used `PIL.Image.resize` instead, whose default resampler
+    is bicubic, so one photograph arrived at the model with slightly different
+    pixels depending on the path it took - the reviewer measured different
+    validation results through the two paths. Every path now goes through this
+    one function; notebook sections 3.4 and 7.3 measure that the outputs agree.
+    """
+    import tensorflow as tf
+
+    arr = tf.convert_to_tensor(np.asarray(images), dtype=tf.float32)
+    arr = tf.image.resize(arr, tuple(image_size), method="bilinear")
+    return np.asarray(arr)
+
+
+def read_model_input(source, image_size: tuple[int, int]) -> np.ndarray:
+    """Model input for a file path *or* an already-decoded RGB array.
+
+    A path is decoded with `tf.io.decode_image` and resized with
+    `tf.image.resize`, i.e. exactly what `make_dataset` does, so the Gradio
+    callback sees bit-identical pixels to the training pipeline. Formats that
+    TensorFlow cannot decode fall back to PIL instead of raising. An array is
+    assumed to be decoded already (video frames, Gradio's numpy mode) and only
+    gets the shared resize.
+    """
+    import tensorflow as tf
+
+    if isinstance(source, (str, Path)):
+        try:
+            raw = tf.io.read_file(str(source))
+            img = tf.io.decode_image(raw, channels=3, expand_animations=False)
+            img = tf.image.resize(img, tuple(image_size), method="bilinear")
+            return np.asarray(tf.cast(img, tf.float32))
+        except Exception:
+            with Image.open(source) as im:
+                return to_model_input(np.asarray(im.convert("RGB")), image_size)
+    return to_model_input(np.asarray(source)[..., :3], image_size)
+
+
 # ---------------------------------------------------------------------------
 # tf.data pipelines
 # ---------------------------------------------------------------------------
@@ -565,11 +606,19 @@ def dataset_summary(ds) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # augmentation
 # ---------------------------------------------------------------------------
-def make_augmenter(seed: int = 341, strength: float = 0.15):
+#: Rotation budget, as a fraction of a full turn. The first release used 0.15,
+#: i.e. +/-54 degrees, which let a quarter of the augmented batches show a clearly
+#: tilted horizon (40-54 deg) - not something a handheld weather photo does, and it
+#: also pushed "sky above, ground below" towards "sky on the left". 0.04 is
+#: +/-14.4 degrees, which covers a tilted handheld frame without inventing scenes.
+ROTATION = 0.04
+
+
+def make_augmenter(seed: int = 341, strength: float = ROTATION):
     """Plausible weather-photo variation only: no vertical flip, no hue swap.
 
     * horizontal flip     - cameras are held either way; weather is symmetric
-    * small rotation/zoom - handheld framing
+    * small rotation/zoom - handheld framing (rotation is +/-14 deg, see ROTATION)
     * brightness/contrast - exposure differences between cameras and days
     * saturation jitter    - sensor and white-balance differences
 
@@ -753,8 +802,7 @@ def predict_frames(model, frames: list[tuple[float, np.ndarray]],
     """Return per-frame probabilities and their timestamps."""
     if not frames:
         return np.zeros((0, 1)), []
-    batch = np.stack([np.asarray(Image.fromarray(f).resize(spec.image_size))
-                      for _, f in frames]).astype("float32")
+    batch = to_model_input([f for _, f in frames], spec.image_size)
     batch = np.asarray(spec.fn(batch))
     probs = model.predict(batch, batch_size=batch_size, verbose=0)
     return probs, [t for t, _ in frames]
@@ -858,8 +906,7 @@ def annotate_video(src: str | Path, dst: str | Path, model, spec: PreprocessSpec
             break
         if idx % step == 0:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            arr = np.asarray(Image.fromarray(rgb).resize(spec.image_size),
-                             dtype="float32")[None, ...]
+            arr = to_model_input(rgb, spec.image_size)[None, ...]
             probs = model.predict(np.asarray(spec.fn(arr)), verbose=0)[0]
             sampled.append(np.asarray(probs, dtype="float64"))
             k = int(np.argmax(probs))

@@ -15,3 +15,6 @@ datasets/*
 !datasets/hand-filtered
 !datasets/metadata
 tools/
+
+# Gradio callback 輸出（每次執行都重新產生的大檔）
+Reports/gradio-annotated-*.mp4
