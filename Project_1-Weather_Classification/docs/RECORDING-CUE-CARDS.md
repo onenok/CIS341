@@ -40,7 +40,7 @@
 | 音高 | 1.25× 會把人聲拉高大約 4 個半音，聲音變薄變尖——**這反而更像合成音** |
 | 根本原因 | 原本 9 分鐘代表內容超預算。加速只是把超長藏起來，示範時間還是只有十幾秒 |
 
-**這次的目標是 6 分 45 秒左右，正常語速，不做任何後製加速。**
+**這次的目標是 7 分 20 秒左右，正常語速，不做任何後製加速。**
 下面的提示卡就是照這個長度設計的。
 
 ---
@@ -52,16 +52,17 @@
 
 ### 步驟
 
+0. **三支介面我已經啟動好，現在就能用**（見第九節，重開機後要再跑一次）。
 1. **OBS 設定**照 [RECORDING-PLAN.md](./RECORDING-PLAN.md) 第二節（1080p / 30 fps / CQP 22）。
 2. **手機打開本文件**（或印出來），放在鏡頭旁邊。螢幕上只放 notebook。
-3. **一次只錄一張卡**，檔名 `01.mp4`、`02.mp4`……共 14 個檔。
+3. **一次只錄一張卡**，檔名 `01.mp4`、`02.mp4`……共 15 個檔。
 4. 講壞了就**整張卡重錄**，不用從頭。
 5. 每錄完一張，**立刻回放聽一次**（30 秒，不要省）。
 6. 全部錄完，用下面的指令合併（`ffmpeg` 若沒有，先 `winget install Gyan.FFmpeg`）：
 
 ```powershell
 cd "c:\Users\honok\Desktop\cis341\Project_1-Weather_Classification\_rec2"
-"file '01.mp4'`nfile '02.mp4'`nfile '03.mp4'`nfile '04.mp4'`nfile '05.mp4'`nfile '06.mp4'`nfile '07.mp4'`nfile '08.mp4'`nfile '09.mp4'`nfile '10.mp4'`nfile '11.mp4'`nfile '12.mp4'`nfile '13.mp4'`nfile '14.mp4'" | Out-File -Encoding ascii list.txt
+"file '01.mp4'`nfile '02.mp4'`nfile '03.mp4'`nfile '04.mp4'`nfile '05.mp4'`nfile '06.mp4'`nfile '07.mp4'`nfile '08.mp4'`nfile '09.mp4'`nfile '10.mp4'`nfile '11.mp4'`nfile '12.mp4'`nfile '13.mp4'`nfile '14.mp4'`nfile '15.mp4'" | Out-File -Encoding ascii list.txt
 ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ```
 
@@ -85,7 +86,7 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ---
 
-## 四、14 張提示卡
+## 四、15 張提示卡
 
 > **粗體 = 你要講的英文。** 英文下面的小字是中文意思。
 > 每張卡的「只記一句」是萬一你緊張到全忘，講那一句就夠。
@@ -248,66 +249,93 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ---
 
-### 卡 10 ｜ 5:00–5:30 ｜ 畫面：7 節介面截圖或直接切到瀏覽器的影像介面
+### 卡 10 ｜ 5:00–5:35 ｜ 畫面：瀏覽器 `http://127.0.0.1:7871/`（影像介面）
 
-1. **This is the interface. Choose a model, then upload an image.**
-   （這是介面。選模型，然後上傳圖片。）
-2. **It shows the top classes and their scores.**
-   （它顯示最可能的類別與分數。）
+> **已實測**：這支介面**沒有模型選單**，標題下方固定寫「模型：mobilenet_v2」。
+> 所以不要說「選一個模型」，要說「部署的模型是 MobileNetV2」。
+
+1. **This is the image interface.**
+   （這是影像介面。）
+2. **The deployed model is MobileNetV2.**
+   （部署的模型是 MobileNetV2。）
 3. **Model and preprocessing come from a saved config.**
    （模型與前處理都從存好的設定讀取。）
 4. **So the interface cannot drift from training.**
    （所以介面不會和訓練時不一致。）
 
-**只記一句**：Choose a model, then upload an image.
+**只記一句**：This is the image interface. The deployed model is MobileNetV2.
+**發音**：MobileNetV2 = **MOH-byle-net V two**
 
 ---
 
-### 卡 11 ｜ 5:30–6:10 ｜ 畫面：**實際按一次送出**，讓分數跑出來
+### 卡 11 ｜ 5:35–6:15 ｜ 畫面：**上傳並按 Submit**，讓分數跑出來
 
-> **先用這張圖（我已經實測過，分數很高、不會出錯）**：
-> 介面選 **MobileNetV2**，上傳
-> `datasets\hand-filtered\rainy\rain97.jpg`
-> 實測輸出：**rainy 0.9998**，其他三類 0.0000 / 0.0000 / 0.0002
+> **用這張圖（兩邊模型都實測正確，不會翻車）**：
+> `datasets\hand-filtered\sunny\shine85.jpg`
+> 畫面實測：**sunny 99%｜overcast 1%｜rainy 0%｜snowy 0%**
+> 後端實測：mobilenet_v2 sunny 0.984、scratch_cnn sunny 0.998
 >
-> 備用（分數第二高、同樣安全）：`datasets\hand-filtered\rainy\rain47.jpg` → rainy **0.9997**
-> 想示範小模型就用 `datasets\hand-filtered\rainy\rain155.jpg` → rainy **0.9861**
->
-> **不要用** `overcast\cuaca_rainy_0105.jpg` 這種檔名和標籤不一致的圖，會多出一個要解釋的畫面。
+> **不要用雨天圖示範。** 我實測 `rainy/rain97.jpg` 在 MobileNetV2 是 rainy 100%，
+> 但同一張在自制 CNN 是 **snowy**——若你現場提到另一個模型，畫面會自相矛盾。
+> 晴天的圖是兩個模型都判對的少數類別。
 
 1. **Here is a real prediction.**
    （這裡做一次真實預測。）
 2. **This is one of the held-out validation images.**
-   （這是驗證集裡留出來的圖，模型沒用它訓練。）
-3. **The model says rainy, with a score of zero point nine nine.**
-   （模型說是雨天，分數 0.99。）← **照著畫面上的數字念，四捨五入到兩位就好**
+   （這是驗證集留出來的圖，模型沒用它訓練。）
+3. **The model says sunny, with ninety-nine percent.**
+   （模型說是晴天，99%。）← **照畫面念**
 4. **The other classes are almost zero.**
    （其他類別幾乎是零。）
-5. **Now I'll run a video.**
-   （現在跑一段影片。）
+5. **Now the video interface.**
+   （接下來是影片介面。）
 
-**只記一句**：Here is a real prediction. The model says rainy.
-**注意**：第 3 句的數字**一定要照螢幕上顯示的念**。若臨時換了圖、分數低於 0.6，
-就誠實說 "The model says rainy, but the score is low."——誠實比好看安全。
-
----
-
-### 卡 12 ｜ 6:10–6:40 ｜ 畫面：8.3 影片輸出的逐幀結果圖或表格
-
-1. **This is the video result.**
-   （這是影片結果。）
-2. **The model scores every sampled frame.**
-   （模型對每個取樣幀打分數。）
-3. **It finds the snow in the second half.**
-   （它在後半段找到雪。）
-4. **Overcast is still the weakest class.**
-   （陰天仍然是最弱的一類。）
-
-**只記一句**：It finds the snow in the second half.
+**只記一句**：Here is a real prediction. The model says sunny.
+**注意**：數字一定照螢幕念。Gradio 會把小數顯示成整數百分比，**不要念 0.984**，念 99%。
 
 ---
 
-### 卡 13 ｜ 6:40–7:00 ｜ 畫面：9.3 六類混淆矩陣
+### 卡 12 ｜ 6:15–6:45 ｜ 畫面：`http://127.0.0.1:7862/` 跑 `videos\main-weather-sunny.mp4`
+
+> **已實測**（間隔 1.0 秒、使用預設滑桿）：9 個取樣點，
+> 平均 snowy **43.7%｜sunny 31.5%｜rainy 24.3%｜overcast 0.5%**，
+> 摘要列顯示「取樣間隔 1.00 秒（每秒 1.00 次，共 9 個取樣點）」。
+
+1. **Here is the video interface.**
+   （這是影片介面。）
+2. **The slider sets the maximum gap between samples.**
+   （滑桿設定取樣的最大間隔。）
+3. **It is capped at one second, so every second is sampled.**
+   （上限一秒，所以每一秒都有取樣。）
+4. **The model gives nine sample points, and a score for each.**
+   （九個取樣點，每個都有分數。）
+5. **Overcast stays under one percent.**
+   （陰天一直低於 1%。）
+
+**只記一句**：It samples every second and gives a score for each frame.
+**為什麼要講第 3 句**：第 2 項扣分（−1.5%）就是這個滑桿，講出來才算回應到。
+
+---
+
+### 卡 13 ｜ 6:45–7:00 ｜ 畫面：`http://127.0.0.1:7863/` 跑 `videos\video2.mp4`
+
+> **已實測**：39 個取樣點、偵測到 **7 次**變化、最後一次 rainy→snowy 在 **5.21 秒**、
+> 結論列寫「overcast 從未被選為最高（全片最高 23.0% 於 t=6.88s）」。
+
+1. **This interface finds weather changes.**
+   （這個介面找天氣變化。）
+2. **It found seven changes in this clip.**
+   （這段影片找到七次變化。）
+3. **Overcast is never the top class here.**
+   （陰天在這裡從來不是最高。）
+4. **That is the known weakness.**
+   （這是已知的弱點。）
+
+**只記一句**：It found seven changes. Overcast is never the top class.
+
+---
+
+### 卡 14 ｜ 7:00–7:20 ｜ 畫面：9.3 六類混淆矩陣
 
 1. **Six classes adds foggy and lightning.**
    （六類多了霧和閃電。）
@@ -320,7 +348,7 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ---
 
-### 卡 14 ｜ 7:00–7:15 ｜ 畫面：6.6 部署選擇那張表
+### 卡 15 ｜ 7:20–7:35 ｜ 畫面：6.6 部署選擇那張表
 
 1. **I deploy the small model. It is enough, and it is fast.**
    （我部署小模型。夠用，而且快。）
@@ -367,29 +395,49 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ## 七、錄完的檢查清單
 
-- [ ] 總長 **7 分 30 秒以內**（目標 6:45–7:15）
+- [ ] 總長 **7 分 30 秒以內**（目標 7:00–7:25）
 - [ ] 聲音清楚，沒有爆音，沒有鍵盤聲壓過人聲
-- [ ] **實際按過一次送出**，分數有出現在畫面上（這一條之前幾乎沒有）
+- [ ] **實際按過 Submit**，分數有出現在畫面上（這一條之前幾乎沒有）
 - [ ] 卡 8 講的是「不是過擬合」（這是最關鍵的一句）
+- [ ] 卡 12 有講「上限一秒」（回應第 2 項扣分）
 - [ ] 有講到剪接（"I've cut the waiting time here."）
-- [ ] 畫面上的數字和你念的一致（尤其卡 7、卡 11、卡 13）
+- [ ] 畫面上的數字和你念的一致（尤其卡 7、卡 11、卡 12）
 - [ ] 沒有 cideo.com 之類的第三方水印
 - [ ] 檔案 < 200 MB
 
 ---
 
-## 八、時程（現在 11/20 22:25，死線 11/22 23:59）
+## 八、時程（現在 11/21 10:50，死線 11/22 23:59）
 
 | 時間 | 做什麼 |
 |---|---|
-| 今晚 30 分鐘 | 只做一件事：把 notebook 開好、`nbconvert --to html`、F11 全螢幕、Ctrl+F 試跳每一節。**不錄音** |
-| 今晚 20 分鐘 | 讀卡 1–14 各一次，出聲念，不錄 |
-| 明天上午 | 錄卡 1–7（資料到訓練比較），約 40 分鐘含重錄 |
-| 明天下午 | 錄卡 8–14（分析、介面、影片、六類），約 50 分鐘 |
-| 明天晚上 | 合併、檢查清單、更新 README、重打包 zip |
+| 今天上午 30 分鐘 | 開 `dist\project1.html`、F11 全螢幕、Ctrl+F 試跳 6.3 / 6.4 / 7 / 8 / 9 各一次。**不錄音** |
+| 今天上午 20 分鐘 | 讀卡 1–15 各一次，出聲念，不錄 |
+| 今天下午 | 錄卡 1–9（資料到除錯），約 45 分鐘含重錄 |
+| 今天下午 | 錄卡 10–15（三個介面 + 六類 + 收尾），約 40 分鐘 |
+| 今天晚上 | 合併、跑檢查清單、我幫你覆蓋 `recordings/` 並重打包 zip |
 | 11/22 | 緩衝日 + Moodle 上傳並確認「Submitted for grading」 |
 
 > 最後一天不要留給錄影。錄影一定會比預期多花時間。
+
+---
+
+## 九、三支介面（已啟動，可直接錄）
+
+| 介面 | 網址 | 用途 | 實測狀態 |
+|---|---|---|---|
+| 影像分類 | http://127.0.0.1:7871/ | 卡 10–11 | ✅ sunny 99% on `shine85.jpg` |
+| 主要天氣影片 | http://127.0.0.1:7862/ | 卡 12 | ✅ 9 取樣點，snowy 43.7% |
+| 天氣變化 | http://127.0.0.1:7863/ | 卡 13 | ✅ 39 取樣點，7 次變化 |
+
+**重開機或關掉之後要重新啟動**（這支腳本會把 notebook 的介面原樣跑起來）：
+
+```powershell
+cd "c:\Users\honok\Desktop\cis341\Project_1-Weather_Classification"
+.\.venv\Scripts\python.exe tools\serve_demos.py all
+```
+
+看到 `[serve] image/video/change: READY` 三行就可以開始錄。**這個視窗不要關。**
 
 ---
 

@@ -18,3 +18,6 @@ tools/
 
 # Gradio callback 輸出（每次執行都重新產生的大檔）
 Reports/gradio-annotated-*.mp4
+
+# tools/serve_demos.py 輸出
+_serve.log
