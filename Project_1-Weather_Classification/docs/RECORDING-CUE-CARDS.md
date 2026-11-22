@@ -172,10 +172,19 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
    （這是我的天氣分類專題。）
 2. **I used GitHub Copilot, and I checked every result myself.**
    （我用了 Copilot，而每一個結果都是我自己核對的。）
-3. **So the notebook below is the evidence.**
-   （所以下面的 notebook 就是證據。）
+3. **This section lists exactly what I used it for.**
+   （這一節逐項列出我用它做了什麼。）
 
 **只記一句**：This is my weather classification project.
+
+**第 3 句指著畫面，不指著整個 notebook。** 卡 1 的畫面就是這一個 cell（AI 使用聲明
+表格），所以句子要講「這一節」。原本寫 "the notebook below" 會有兩個問題：
+鏡頭還停在聲明上、沒有在下面的內容，句子卻指向下面；而且「整份 notebook 是證據」
+講了等於沒講 —— 整支影片本來就在展示 notebook。
+
+改成講這一節，同時也**接住了第 2 句**：第 2 句說「我自己核對過」，
+第 3 句說「這一節逐項列出我用了它做什麼」，兩句合起來就是評語要的那 −2%。
+「下面的內容」留到卡 2 再展開，那時的畫面才真的在往下走。
 
 **為什麼第 2 句有 and**：原本兩句並排（"I used Copilot." "I checked the results."）
 中間沒有連接詞，聽起來像兩件不相干的事。加 `and` 之後是**一件事的兩半**：
