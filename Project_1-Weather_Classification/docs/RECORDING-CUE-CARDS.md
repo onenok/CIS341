@@ -445,12 +445,19 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
 
 **畫面標籤：`pre-executed output`**
 
-1. **I deploy the small model. It is enough, and it is fast.**
-   （我部署小模型。夠用，而且快。）
-2. **Thank you.**
+1. **I deploy MobileNetV2. It is better on every class.**
+   （我部署 MobileNetV2。它在每一類上都更好。）
+2. **Even the hardest class improves.**
+   （連最難的那一類都變好。）
+3. **Thank you.**
    （謝謝。）
 
-**只記一句**：I deploy the small model. Thank you.
+**只記一句**：I deploy MobileNetV2. Thank you.
+
+**畫面數字（照表念，不要自己算）**：val_acc **0.9393 對 0.8179**；
+macro F1 **0.9338 對 0.7907**；`rainy` recall **0.942 對 0.442**。
+參數 2,263,108 對 257,860，但**可訓練**只有 5,124 對 257,860。
+**不要說「小模型夠用」** —— 6.6 的結論正好相反。
 
 ---
 

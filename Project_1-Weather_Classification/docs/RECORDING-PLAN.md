@@ -211,7 +211,7 @@
 
 - **畫面**：cell 70 的比較表。
 - **旁白**：
-  > "Deployment: transfer, zero point nine three nine three against zero point eight one seven nine, and far less training time. It's used by the image interface and by every video function."
+  > "Deployment: transfer, zero point nine three nine three against zero point eight one seven nine. Every class is better, including the hardest one — rainy recall goes from zero point four four two to zero point nine four two. It's used by the image interface and by every video function."
 
 ### 4:25–5:10｜影像介面（45 秒）
 
