@@ -170,12 +170,22 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
 
 1. **This is my weather classification project.**
    （這是我的天氣分類專題。）
-2. **I used GitHub Copilot. I checked the results myself.**
-   （我用了 Copilot，結果我自己核對過。）
-3. **The notebook below shows all the evidence.**
-   （下面的 notebook 就是全部證據。）
+2. **I used GitHub Copilot, and I checked every result myself.**
+   （我用了 Copilot，而每一個結果都是我自己核對的。）
+3. **So the notebook below is the evidence.**
+   （所以下面的 notebook 就是證據。）
 
 **只記一句**：This is my weather classification project.
+
+**為什麼第 2 句有 and**：原本兩句並排（"I used Copilot." "I checked the results."）
+中間沒有連接詞，聽起來像兩件不相干的事。加 `and` 之後是**一件事的兩半**：
+AI 有參與，**而**結論由我核對。`checked every result` 也比 `the results` 明確 —— 一個都不例外。
+
+**不要用 but**：`but` 帶辯解味，好像「雖然用了 AI，但不是我做的」需要先消毒。
+`and` 是並列，只是陳述事實，語氣更穩。
+
+**語氣**：講 `and` 時**停半秒**，然後把 `I checked every result myself` 講慢一點。
+這是整段錄影唯一需要放慢的地方。
 
 ---
 
@@ -466,6 +476,8 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
 
 | 字 | 近似發音 | 中文 |
 |---|---|---|
+| Copilot | **KOH**-pi-lot | 微軟的 AI 工具 |
+| GitHub | **GIT**-hub | （兩個字都清楚，不要連讀成 "githb"） |
 | overcast | **OH**-ver-kast | 陰天 |
 | epoch | **EE**-pok | 訓練輪次 |
 | parameters | pa-**RAM**-eh-terz | 參數 |
