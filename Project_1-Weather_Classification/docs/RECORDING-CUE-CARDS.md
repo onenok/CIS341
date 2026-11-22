@@ -101,8 +101,45 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 | 標籤文字 | 什麼時候出現 |
 |---|---|
 | `pre-executed output` | 畫面是 notebook 已存好的 cell 輸出 |
-| `replay` | 重播剛才已經播過的片段 |
+| `replay` | 重播剛才已經播過的片段，或播放你預先錄好的 Gradio 操作 |
 | `live` | 現場按、現場跑的（卡 10–13 的 Gradio 操作） |
+
+#### 哪一張卡掛哪個標籤（照這張表貼）
+
+判斷原則：**標籤描述「畫面上的像素是哪來的」，不是描述「你有沒有在動滑鼠」。**
+你在 notebook 裡滾動、點 cell 都是現場動作，但只要 cell 的輸出是先前跑好存下來的，
+畫面就仍然是 `pre-executed output`。
+
+| 卡 | 時間 | 畫面 | 標籤 |
+|---|---|---|---|
+| 1 | 0:00–0:20 | notebook 標題 + AI 聲明 | `pre-executed output` |
+| 2 | 0:20–0:55 | 第 2 節資料來源表、張數表 | `pre-executed output` |
+| 3 | 0:55–1:20 | 去重 summary + 分割 | `pre-executed output` |
+| 4 | 1:20–1:55 | 第 3 節增強說明 + 預覽圖 | `pre-executed output` |
+| 5 | 1:55–2:20 | 第 4 節模型設計 | `pre-executed output` |
+| 6 | 2:20–2:50 | 第 5 節超參數表 | `pre-executed output` |
+| 7 | 2:50–3:35 | 6.2 訓練曲線 + 6.5 比較表 | `pre-executed output` |
+| 8 | 3:35–4:25 | 6.3 曲線解讀 + 6.3b 表 | `pre-executed output` |
+| 9 | 4:25–5:00 | 6.4.1 / 6.4.2 / 6.4.3 | `pre-executed output` |
+| 10 | 5:00–5:35 | 瀏覽器 7871 影像介面 | **`live`** |
+| 11 | 5:35–6:15 | 上傳 + Submit + 分數 | **`live`** |
+| 12 | 6:15–6:45 | 瀏覽器 7862 影片介面 | **`live`** |
+| 13 | 6:45–7:00 | 瀏覽器 7863 變天介面 | **`live`** |
+| 14 | 7:00–7:14 | 9.3 六類混淆矩陣 | `pre-executed output` |
+| 15 | 7:14–7:22 | 6.6 部署選擇表 | `pre-executed output` |
+
+**所以實際上只切兩次標籤**：卡 1 開始時掛 `pre-executed output`，
+卡 10 開始時換成 `live`，卡 14 開始時換回 `pre-executed output`。
+OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
+
+#### `replay` 什麼時候才會用到
+
+只有一種情況：你決定**先把卡 10–13 的 Gradio 操作預錄一次**，
+之後在正式錄影時播放那段預錄畫面。這時卡 10–13 就從 `live` 改成 `replay`。
+
+這條路有代價：要說清楚是預錄的，而且不能把預錄講成現場。
+好處是 Gradio 跑很久（影片分析要幾十秒）不會拖爆時間軸。
+**如果你想走這條，先跟我說，我把卡 10–13 的稿改成 replay 版本。**
 
 #### 兩條不能踩的線
 
@@ -129,6 +166,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 1 ｜ 0:00–0:20 ｜ 畫面：notebook 最頂端（標題 + AI 使用聲明）
 
+**畫面標籤：`pre-executed output`**
+
 1. **This is my weather classification project.**
    （這是我的天氣分類專題。）
 2. **I used GitHub Copilot. I checked the results myself.**
@@ -141,6 +180,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 2 ｜ 0:20–0:55 ｜ 畫面：第 2 節的資料來源表與張數表（cell 12 附近）
+
+**畫面標籤：`pre-executed output`**
 
 1. **My images come from public weather datasets.**
    （我的圖片來自公開的天氣資料集。）
@@ -158,6 +199,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 3 ｜ 0:55–1:20 ｜ 畫面：去重 summary + 分割那一格
 
+**畫面標籤：`pre-executed output`**
+
 1. **Duplicates are removed by file hash.**
    （重複的圖用檔案雜湊比對移除。）
 2. **The split is grouped, so copies never cross it.**
@@ -172,6 +215,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 4 ｜ 1:20–1:55 ｜ 畫面：第 3 節資料增強說明 + 預覽圖（3.4b）
+
+**畫面標籤：`pre-executed output`**
 
 1. **Augmentation is flip, small rotation, zoom and brightness.**
    （增強是翻轉、小幅旋轉、縮放、亮度。）
@@ -191,6 +236,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 5 ｜ 1:55–2:20 ｜ 畫面：第 4 節模型設計（4.1 / 4.1b）
 
+**畫面標籤：`pre-executed output`**
+
 1. **Two models. First, a small CNN from scratch.**
    （兩個模型。第一個是從零訓練的小 CNN。）
 2. **Two hundred fifty-seven thousand parameters.**
@@ -207,6 +254,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 6 ｜ 2:20–2:50 ｜ 畫面：第 5 節超參數表
 
+**畫面標籤：`pre-executed output`**
+
 1. **Both models use the same pipeline.**
    （兩個模型用同一套流程。）
 2. **Adam. Learning rate one e minus three.**
@@ -221,6 +270,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 7 ｜ 2:50–3:35 ｜ 畫面：6.2 訓練曲線 + 6.5 比較表
+
+**畫面標籤：`pre-executed output`**
 
 1. **The from-scratch model reaches zero point eight two.**
    （從零訓練的模型到 0.82。）
@@ -237,6 +288,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 8 ｜ 3:35–4:25 ｜ 畫面：6.3 曲線解讀 + 6.3b 表 ← **最重要，慢一點**
+
+**畫面標籤：`pre-executed output`**
 
 1. **This is the part I got wrong before.**
    （這是我之前講錯的地方。）
@@ -264,6 +317,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 9 ｜ 4:25–5:00 ｜ 畫面：6.4.1 預測表、6.4.2 表格、6.4.3 比較
 
+**畫面標籤：`pre-executed output`**
+
 1. **Three checks. First, two bugs together.**
    （三個檢查。第一個：兩個 bug 同時存在。）
 2. **Batch norm plus double scaling.**
@@ -285,6 +340,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 10 ｜ 5:00–5:35 ｜ 畫面：瀏覽器 `http://127.0.0.1:7871/`（影像介面）
 
+**畫面標籤：`live`**
+
 > **已實測**：這支介面**沒有模型選單**，標題下方固定寫「模型：mobilenet_v2」。
 > 所以不要說「選一個模型」，要說「部署的模型是 MobileNetV2」。
 
@@ -303,6 +360,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 11 ｜ 5:35–6:15 ｜ 畫面：**上傳並按 Submit**，讓分數跑出來
+
+**畫面標籤：`live`**
 
 > **用這張圖（兩邊模型都實測正確，不會翻車）**：
 > `datasets\hand-filtered\sunny\shine85.jpg`
@@ -331,6 +390,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 12 ｜ 6:15–6:45 ｜ 畫面：`http://127.0.0.1:7862/` 跑 `videos\main-weather-sunny.mp4`
 
+**畫面標籤：`live`**
+
 > **已實測**（間隔 1.0 秒、使用預設滑桿）：9 個取樣點，
 > 平均 snowy **43.7%｜sunny 31.5%｜rainy 24.3%｜overcast 0.5%**，
 > 摘要列顯示「取樣間隔 1.00 秒（每秒 1.00 次，共 9 個取樣點）」。
@@ -353,6 +414,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 13 ｜ 6:45–7:00 ｜ 畫面：`http://127.0.0.1:7863/` 跑 `videos\video2.mp4`
 
+**畫面標籤：`live`**
+
 > **已實測**：39 個取樣點、偵測到 **7 次**變化、最後一次 rainy→snowy 在 **5.21 秒**、
 > 結論列寫「overcast 從未被選為最高（全片最高 23.0% 於 t=6.88s）」。
 
@@ -371,6 +434,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ### 卡 14 ｜ 7:00–7:14 ｜ 畫面：9.3 六類混淆矩陣
 
+**畫面標籤：`pre-executed output`**
+
 1. **Six classes adds foggy and lightning.**
    （六類多了霧和閃電。）
 2. **Validation accuracy is zero point nine three.**
@@ -383,6 +448,8 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 ---
 
 ### 卡 15 ｜ 7:14–7:22 ｜ 畫面：6.6 部署選擇那張表
+
+**畫面標籤：`pre-executed output`**
 
 1. **I deploy the small model. It is enough, and it is fast.**
    （我部署小模型。夠用，而且快。）
