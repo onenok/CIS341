@@ -126,11 +126,17 @@
 每句只有 6–12 個字、附中文意思與難字發音，講壞了只重錄那一張。
 
 - 分開錄完全合規：作業原文「**你可以剪掉等待時間，但須標明**」。
-- **每次剪接要在旁白裡講明**，一句話就夠：
-  `"I've cut the waiting time here."` /
-  `"This result was already saved, so I'm not running it again."`
+- **標明方式用「轉場 + 畫面標籤」，不要每段講一句話。**
+  規格要求標明的是「已儲存的結果」與「重播的片段」，轉場只表達「跳過了」，
+  標籤才表達「這段是預先跑好的」。
+  - 每個剪接點：0.3–0.5 秒淡化或黑場。
+  - 已存好的輸出：右下角常駐 `pre-executed output`；重播標 `replay`；現場操作標 `live`。
+  - 只在第一次剪接講一句 `"I'm cutting the waiting time. From here on, everything is pre-executed output."`，
+    之後全靠標籤，省約 25 秒。
+  - **不要把 replay 標成 live**；也不要只加轉場不加標籤。
+  - 標籤不必好看：規格第 316 行明說不為剪輯精緻度給分。
 - **不要再用線上工具加速。** 現有影片的 cideo.com 水印與偏尖的音色就是 1.25× 造成的；
-  新做法目標 6:45–7:15，正常語速，不需要任何後製加速。
+  新做法目標 7:00–7:25，正常語速，不需要任何後製加速。
 
 ---
 
@@ -288,7 +294,7 @@
 - [ ] 有示範**被拒絕的間隔值**（顯示 `gr.Error`）與**被接受的**值
 - [ ] 兩支變天影片都跑過（`video2.mp4` 與 `common-changing-weather.mp4`）
 - [ ] 變天介面有顯示**回傳的標註影片**與時間軸
-- [ ] 任何剪接處都有旁白說明（"I've cut the waiting time here."）
+- [ ] 每個剪接處都有轉場，且已存好的輸出有 `pre-executed output` 標籤
 - [ ] 檔案 < 200 MB；太大就轉檔或給 OneDrive 連結
 - [ ] 檔名沿用 `recordings/screen-recording.mp4`（覆蓋舊檔），或改成 `screen-recording-v2.mp4` 並同步更新 `dist/README.txt` 與 `REVISION-CHANGES.md` C 節
 
