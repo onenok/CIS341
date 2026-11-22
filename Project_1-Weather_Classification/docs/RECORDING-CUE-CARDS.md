@@ -161,6 +161,7 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
 
 > **粗體 = 你要講的英文。** 英文下面的小字是中文意思。
 > 每張卡的「只記一句」是萬一你緊張到全忘，講那一句就夠。
+> **理由與取捨寫在第三、五、六節，卡片這裡只有要照讀的東西。**
 
 ---
 
@@ -176,25 +177,7 @@ OBS 裡就是同一個文字來源改三次字，不用做 15 個圖層。
    （這一節逐項列出我用它做了什麼。）
 
 **只記一句**：This is my weather classification project.
-
-**第 3 句指著畫面，不指著整個 notebook。** 卡 1 的畫面就是這一個 cell（AI 使用聲明
-表格），所以句子要講「這一節」。原本寫 "the notebook below" 會有兩個問題：
-鏡頭還停在聲明上、沒有在下面的內容，句子卻指向下面；而且「整份 notebook 是證據」
-講了等於沒講 —— 整支影片本來就在展示 notebook。
-
-改成講這一節，同時也**接住了第 2 句**：第 2 句說「我自己核對過」，
-第 3 句說「這一節逐項列出我用了它做什麼」，兩句合起來就是評語要的那 −2%。
-「下面的內容」留到卡 2 再展開，那時的畫面才真的在往下走。
-
-**為什麼第 2 句有 and**：原本兩句並排（"I used Copilot." "I checked the results."）
-中間沒有連接詞，聽起來像兩件不相干的事。加 `and` 之後是**一件事的兩半**：
-AI 有參與，**而**結論由我核對。`checked every result` 也比 `the results` 明確 —— 一個都不例外。
-
-**不要用 but**：`but` 帶辯解味，好像「雖然用了 AI，但不是我做的」需要先消毒。
-`and` 是並列，只是陳述事實，語氣更穩。
-
-**語氣**：講 `and` 時**停半秒**，然後把 `I checked every result myself` 講慢一點。
-這是整段錄影唯一需要放慢的地方。
+**語氣**：講 `and` 前停半秒，`I checked every result myself` 放慢。全片只有這裡放慢。
 
 ---
 
@@ -302,7 +285,7 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
    （兩者的訓練／驗證落差都很小。）
 
 **只記一句**：Zero point eight two, and zero point nine four.
-**提示**：講數字時手指著畫面上的 0.8179 / 0.9393，會比念得準更有說服力。
+**提示**：講數字時指著畫面的 0.8179 / 0.9393。
 
 ---
 
@@ -361,8 +344,7 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
 
 **畫面標籤：`live`**
 
-> **已實測**：這支介面**沒有模型選單**，標題下方固定寫「模型：mobilenet_v2」。
-> 所以不要說「選一個模型」，要說「部署的模型是 MobileNetV2」。
+> 介面**沒有模型選單**，標題下固定寫「模型：mobilenet_v2」。
 
 1. **This is the image interface.**
    （這是影像介面。）
@@ -382,14 +364,9 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
 
 **畫面標籤：`live`**
 
-> **用這張圖（兩邊模型都實測正確，不會翻車）**：
-> `datasets\hand-filtered\sunny\shine85.jpg`
-> 畫面實測：**sunny 99%｜overcast 1%｜rainy 0%｜snowy 0%**
-> 後端實測：mobilenet_v2 sunny 0.984、scratch_cnn sunny 0.998
->
-> **不要用雨天圖示範。** 我實測 `rainy/rain97.jpg` 在 MobileNetV2 是 rainy 100%，
-> 但同一張在自制 CNN 是 **snowy**——若你現場提到另一個模型，畫面會自相矛盾。
-> 晴天的圖是兩個模型都判對的少數類別。
+> 上傳這張：`datasets\hand-filtered\sunny\shine110.jpg`
+> 畫面會顯示 **sunny 100%｜overcast 0%｜rainy 0%｜snowy 0%**
+> **不要用雨天圖**（`rain97.jpg` 在兩個模型判斷不同，會自相矛盾）。
 
 1. **Here is a real prediction.**
    （這裡做一次真實預測。）
@@ -403,7 +380,7 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
    （接下來是影片介面。）
 
 **只記一句**：Here is a real prediction. The model says sunny.
-**注意**：數字一定照螢幕念。Gradio 會把小數顯示成整數百分比，**不要念 0.984**，念 99%。
+**注意**：照螢幕念。Gradio 顯示整數百分比，不要念 0.984，念 100%。
 
 ---
 
@@ -411,8 +388,7 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
 
 **畫面標籤：`live`**
 
-> **已實測**（間隔 1.0 秒、使用預設滑桿）：9 個取樣點，
-> 平均 snowy **43.7%｜sunny 31.5%｜rainy 24.3%｜overcast 0.5%**，
+> 預設滑桿：9 個取樣點，平均 snowy 43.7%｜sunny 31.5%｜rainy 24.3%｜overcast 0.5%。
 > 摘要列顯示「取樣間隔 1.00 秒（每秒 1.00 次，共 9 個取樣點）」。
 
 1. **Here is the video interface.**
@@ -427,7 +403,6 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
    （陰天一直低於 1%。）
 
 **只記一句**：It samples every second and gives a score for each frame.
-**為什麼要講第 3 句**：第 2 項扣分（−1.5%）就是這個滑桿，講出來才算回應到。
 
 ---
 
@@ -435,8 +410,8 @@ AI 有參與，**而**結論由我核對。`checked every result` 也比 `the re
 
 **畫面標籤：`live`**
 
-> **已實測**：39 個取樣點、偵測到 **7 次**變化、最後一次 rainy→snowy 在 **5.21 秒**、
-> 結論列寫「overcast 從未被選為最高（全片最高 23.0% 於 t=6.88s）」。
+> 39 個取樣點、**7 次**變化、最後一次 rainy→snowy 在 **5.21 秒**、
+> 結論列「overcast 從未被選為最高（全片最高 23.0% 於 t=6.88s）」。
 
 1. **This interface finds weather changes.**
    （這個介面找天氣變化。）
