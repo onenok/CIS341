@@ -94,6 +94,13 @@ flagged each one and the reason recorded at the time.
 Section 2.4b now backs the second claim, and the AI-use disclosure at the top of
 the notebook points at both sections instead of asserting the checks.
 
+The disclosure also gained a section **"這次修訂（依評語重交）的 AI 使用"**. It
+lists, per revision item, which code the AI drafted during this revision and which
+decisions were mine — including the items where the AI's first version was wrong
+(the ±54° rotation, the reversed sampling-interval guard) and the item I refused
+(showing training images as unseen examples). The disclosure now covers the
+revision, not only the original submission.
+
 ### A2. One resize path for training and inference (`−0.5%`)
 
 Same fix as A1 first half. The review's specific request was "show the direct
