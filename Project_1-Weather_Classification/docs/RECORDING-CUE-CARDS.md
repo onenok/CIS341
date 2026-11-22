@@ -102,7 +102,7 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 |---|---|
 | `pre-executed output` | 畫面是 notebook 已存好的 cell 輸出 |
 | `replay` | 重播剛才已經播過的片段 |
-| `live` | 現場按、現場跑的（卡 11、12、13 的 Gradio 操作） |
+| `live` | 現場按、現場跑的（卡 10–13 的 Gradio 操作） |
 
 #### 兩條不能踩的線
 
@@ -369,7 +369,7 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ---
 
-### 卡 14 ｜ 7:00–7:20 ｜ 畫面：9.3 六類混淆矩陣
+### 卡 14 ｜ 7:00–7:14 ｜ 畫面：9.3 六類混淆矩陣
 
 1. **Six classes adds foggy and lightning.**
    （六類多了霧和閃電。）
@@ -382,7 +382,7 @@ ffmpeg -f concat -safe 0 -i list.txt -c copy ..\recordings\screen-recording.mp4
 
 ---
 
-### 卡 15 ｜ 7:20–7:35 ｜ 畫面：6.6 部署選擇那張表
+### 卡 15 ｜ 7:14–7:22 ｜ 畫面：6.6 部署選擇那張表
 
 1. **I deploy the small model. It is enough, and it is fast.**
    （我部署小模型。夠用，而且快。）
