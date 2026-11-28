@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 700" preserveAspectRatio="xMidYMid meet" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <defs>
+    <filter id="card" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000" flood-opacity="0.07"/>
+    </filter>
+    <linearGradient id="bar1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f6b26b"/>
+      <stop offset="100%" stop-color="#f9d3a6"/>
+    </linearGradient>
+    <marker id="a" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#7c5cff"/>
+    </marker>
+    <style>
+      .lbl      { font-size: 15px; fill: #4a4a55; }
+      .hint     { font-size: 13px; fill: #8b8b96; }
+      .ann      { font-size: 12px; fill: #7c5cff; font-family: ui-monospace, 'Cascadia Code', monospace; }
+      .anntext  { font-size: 12.5px; fill: #6b6b76; }
+      .big      { font-size: 32px; font-weight: 650; fill: #1f1f26; }
+      .barname  { font-size: 15.5px; fill: #2a2a33; }
+      .barpct   { font-size: 15px; fill: #4a4a55; font-variant-numeric: tabular-nums; }
+      .title    { font-size: 20px; font-weight: 650; fill: #1f1f26; }
+      .sub      { font-size: 13.5px; fill: #8b8b96; }
+    </style>
+  </defs>
+
+  <rect width="1180" height="700" fill="#f4f4f6"/>
+
+  <!-- header -->
+  <text x="30" y="42" class="title">CIS341 Assignment 2 — 犬種辨識介面（1.4）</text>
+  <text x="30" y="64" class="sub">gr.Blocks 雙欄版面：左側上傳照片，右側以 gr.Label 顯示前五名犬種與分數</text>
+  <text x="1150" y="42" class="ann" text-anchor="end">with gr.Blocks() as demo:</text>
+
+  <!-- ================= LEFT CARD ================= -->
+  <rect x="28" y="82" width="540" height="524" rx="12" fill="#ffffff" stroke="#e2e2e8" filter="url(#card)"/>
+  <text x="52" y="112" class="lbl" font-weight="600">狗照片</text>
+  <text x="544" y="112" class="ann" text-anchor="end">gr.Image(type="filepath")</text>
+
+  <!-- dropzone -->
+  <rect x="52" y="126" width="492" height="300" rx="10" fill="#fafafb" stroke="#b9b9c4" stroke-width="1.6" stroke-dasharray="8 6"/>
+
+  <!-- image glyph -->
+  <rect x="230" y="174" width="136" height="104" rx="8" fill="none" stroke="#c3c3ce" stroke-width="2"/>
+  <circle cx="254" cy="199" r="8" fill="none" stroke="#c3c3ce" stroke-width="2"/>
+  <path d="M234 270 L276 222 L300 252 L322 230 L362 270 Z" fill="none" stroke="#c3c3ce" stroke-width="2" stroke-linejoin="round"/>
+
+  <text x="298" y="316" class="hint" text-anchor="middle" font-size="14.5">拖放照片到此處</text>
+  <text x="298" y="338" class="hint" text-anchor="middle" font-size="14.5">或點擊選擇檔案</text>
+  <text x="298" y="366" class="hint" text-anchor="middle" font-size="11.5">（上傳後此區顯示縮圖）</text>
+  <text x="298" y="406" class="hint" text-anchor="middle" font-size="11.5">JPG / PNG / WebP．EXIF 自動轉正</text>
+
+  <!-- primary button -->
+  <rect x="52" y="446" width="336" height="52" rx="9" fill="#f6b26b" stroke="#e0a05c" stroke-width="1.2"/>
+  <text x="220" y="479" text-anchor="middle" font-size="16.5" font-weight="600" fill="#3a2a18">預測犬種</text>
+  <text x="220" y="522" class="ann" text-anchor="middle">gr.Button(variant="primary")</text>
+
+  <!-- clear button -->
+  <rect x="404" y="446" width="140" height="52" rx="9" fill="#ffffff" stroke="#d3d3dc" stroke-width="1.2"/>
+  <text x="474" y="479" text-anchor="middle" font-size="15" fill="#5a5a66">清除</text>
+  <text x="474" y="522" class="ann" text-anchor="middle">gr.ClearButton</text>
+
+  <!-- status -->
+  <line x1="52" y1="546" x2="544" y2="546" stroke="#ececf1" stroke-width="1"/>
+  <text x="52" y="568" class="anntext">目前模板</text>
+  <text x="118" y="568" class="ann">a photo of a {breed}.</text>
+  <text x="52" y="588" class="hint" font-size="11.5">★ 1.6 換模板後須同步更新，否則截圖與最終設定不符</text>
+
+  <!-- ================= RIGHT CARD ================= -->
+  <rect x="596" y="82" width="556" height="524" rx="12" fill="#ffffff" stroke="#e2e2e8" filter="url(#card)"/>
+  <text x="620" y="112" class="lbl" font-weight="600">前五名犬種</text>
+  <text x="1128" y="112" class="ann" text-anchor="end">gr.Label(num_top_classes=5)</text>
+
+  <!-- top-1 headline -->
+  <text x="620" y="170" class="big">silky terrier</text>
+  <text x="1128" y="168" class="barname" text-anchor="end" font-size="21" font-weight="600" fill="#e0a05c">41 %</text>
+  <line x1="620" y1="186" x2="1128" y2="186" stroke="#f0f0f4" stroke-width="1"/>
+
+  <!-- bars 41 / 26 / 9 / 7 / 5, max width 352 -->
+  <text x="620" y="218" class="barname">silky terrier</text>
+  <rect x="620" y="228" width="352" height="18" rx="4" fill="url(#bar1)"/>
+  <text x="1128" y="242" class="barpct" text-anchor="end">41 %</text>
+
+  <text x="620" y="278" class="barname">Yorkshire terrier</text>
+  <rect x="620" y="288" width="223" height="18" rx="4" fill="url(#bar1)" opacity="0.85"/>
+  <text x="1128" y="302" class="barpct" text-anchor="end">26 %</text>
+
+  <text x="620" y="338" class="barname">Australian terrier</text>
+  <rect x="620" y="348" width="77" height="18" rx="4" fill="url(#bar1)" opacity="0.7"/>
+  <text x="1128" y="362" class="barpct" text-anchor="end">9 %</text>
+
+  <text x="620" y="398" class="barname">Cardigan</text>
+  <rect x="620" y="408" width="60" height="18" rx="4" fill="url(#bar1)" opacity="0.55"/>
+  <text x="1128" y="422" class="barpct" text-anchor="end">7 %</text>
+
+  <text x="620" y="458" class="barname">Norwich terrier</text>
+  <rect x="620" y="468" width="43" height="18" rx="4" fill="url(#bar1)" opacity="0.4"/>
+  <text x="1128" y="482" class="barpct" text-anchor="end">5 %</text>
+
+  <line x1="620" y1="512" x2="1128" y2="512" stroke="#ececf1" stroke-width="1"/>
+  <text x="620" y="534" class="anntext">分數來源：1.3.3 的餘弦相似度排序</text>
+  <text x="620" y="554" class="hint" font-size="11.5">gr.Label 會把 dict 正規化成百分比長條，數值相對比例不變</text>
+  <text x="620" y="578" class="hint" font-size="11.5">回傳格式：{"silky terrier": 0.41, ...}</text>
+
+  <!-- demo callback -->
+  <text x="590" y="628" class="ann" text-anchor="middle">btn.click(fn=ui_predict, inputs=image, outputs=label)</text>
+  <path d="M120 640 L120 612" stroke="#7c5cff" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="120" y="660" class="anntext" text-anchor="middle">輸入區</text>
+  <path d="M874 640 L874 612" stroke="#7c5cff" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="874" y="660" class="anntext" text-anchor="middle">輸出區</text>
+  <text x="590" y="684" class="hint" text-anchor="middle" font-size="11.5">demo.launch() 在 Colab 會另印公開連結；本機則開 http://127.0.0.1:7860</text>
+</svg>

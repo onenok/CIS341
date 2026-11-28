@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="concise">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIS341 作業二 · 使用 CLIP 進行零樣本學習</title>
+<style>
+:root{
+  --bg:#f7f7f9; --panel:#fff; --ink:#1a1a1f; --ink2:#5b5b67; --line:#e3e3ea;
+  --accent:#3178c6; --accent-soft:#eaf2fb;
+  --p1:#d97706; --p1s:#fff7ed; --p2:#059669; --p2s:#ecfdf5; --p3:#9333ea; --p3s:#faf5ff;
+  --warn:#b45309; --warns:#fffbeb; --danger:#b91c1c; --dangers:#fef2f2;
+  --radius:12px; --mono:ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#14161a; --panel:#1c1f26; --ink:#e9eaee; --ink2:#a0a4ae; --line:#2c3038;
+  --accent:#6ba9e8; --accent-soft:#1e2a38;
+  --p1:#f0a44a; --p1s:#2a2117; --p2:#4ec99a; --p2s:#132620; --p3:#c084fc; --p3s:#241a33;
+  --warn:#f0b96b; --warns:#2a2317; --danger:#f28b8b; --dangers:#2b1919;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.75;font-size:16px;
+  -webkit-font-smoothing:antialiased}
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:100;transition:width .1s}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--panel) 88%,transparent);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:.55rem 1.25rem;display:flex;align-items:center;gap:1rem}
+.brand{font-weight:700;letter-spacing:.01em;white-space:nowrap;font-size:.95rem}
+.brand span{color:var(--accent)}
+.top-sp{flex:1}
+.count{font-family:var(--mono);font-size:.8rem;color:var(--ink2);white-space:nowrap}
+.count b{color:var(--danger);font-weight:700}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink2);border-radius:8px;
+  padding:.3rem .6rem;font-size:.8rem;cursor:pointer;font-family:inherit}
+button.ghost:hover{border-color:var(--accent);color:var(--accent)}
+button.ghost.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ---------- concise mode ---------- */
+html.concise .deep{display:none!important}
+html.concise .step > .bd{display:none}
+html.concise .step > .hd{cursor:pointer}
+html.concise .step > .hd::after{content:"▸";color:var(--ink2);font-size:.72rem;flex:0 0 auto}
+html.concise .step.open > .bd{display:block}
+html.concise .step.open > .hd::after{content:"▾"}
+
+/* ---------- tl;dr ---------- */
+.tldr{background:linear-gradient(180deg,var(--accent-soft),transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
+  border-radius:16px;padding:1.3rem 1.4rem;margin:0 0 2.5rem}
+.tldr h2{border:none;margin:0 0 .3rem;padding:0;font-size:1.15rem}
+.tldr .sub{font-size:.85rem;color:var(--ink2);margin:0 0 1rem}
+.acts{list-style:none;margin:0;padding:0;counter-reset:a}
+.acts li{counter-increment:a;position:relative;padding-left:2.6rem;margin:.75rem 0;font-size:.92rem;line-height:1.65}
+.acts li::before{content:counter(a);position:absolute;left:0;top:.05rem;width:1.8rem;height:1.8rem;
+  border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:.85rem;
+  font-weight:700;display:flex;align-items:center;justify-content:center}
+.acts li b{display:block;font-size:.97rem;margin-bottom:.1rem}
+.acts li .why{color:var(--ink2);font-size:.85rem}
+.acts .out{display:inline-block;margin-top:.2rem;font-family:var(--mono);font-size:.76rem;
+  background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.05rem .4rem}
+.tldr .foot{margin-top:1.1rem;padding-top:.9rem;border-top:1px dashed color-mix(in srgb,var(--ink) 18%,transparent);
+  font-size:.84rem;color:var(--ink2)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.25rem 6rem;display:grid;grid-template-columns:230px 1fr;gap:2.5rem}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;gap:0}nav.toc{display:none}}
+nav.toc{position:sticky;top:72px;align-self:start;padding-top:2.5rem;font-size:.86rem}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc a{display:block;padding:.3rem .7rem;border-left:2px solid var(--line);color:var(--ink2);
+  text-decoration:none;border-radius:0 6px 6px 0;transition:.15s}
+nav.toc a:hover{color:var(--ink);background:var(--accent-soft)}
+nav.toc a.on{color:var(--accent);border-left-color:var(--accent);font-weight:600;background:var(--accent-soft)}
+main{padding-top:2.5rem;min-width:0}
+
+/* ---------- hero ---------- */
+.hero{margin-bottom:2.5rem}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem}
+h1{font-size:clamp(1.7rem,4vw,2.5rem);line-height:1.25;margin:0 0 .9rem;letter-spacing:-.01em}
+.lede{font-size:1.02rem;color:var(--ink2);max-width:62ch}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:.3rem .85rem;font-size:.82rem}
+.chip b{font-family:var(--mono)}
+
+/* ---------- sections ---------- */
+section{scroll-margin-top:84px;margin-bottom:3.5rem}
+h2{font-size:1.42rem;margin:0 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--line);
+  display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+h2 .no{font-family:var(--mono);font-size:.78rem;color:var(--ink2);font-weight:400;letter-spacing:.1em}
+h3{font-size:1.08rem;margin:2rem 0 .7rem}
+h4{font-size:.95rem;margin:1.3rem 0 .4rem;color:var(--ink2);letter-spacing:.02em}
+p{margin:.7rem 0}
+a{color:var(--accent)}
+
+/* ---------- stat cards ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin:1.5rem 0 2rem}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:.9rem 1rem}
+.stat .n{font-size:1.5rem;font-weight:700;font-family:var(--mono);line-height:1.2}
+.stat .l{font-size:.76rem;color:var(--ink2);margin-top:.15rem}
+
+/* ---------- pipeline ---------- */
+.pipe{display:flex;flex-wrap:wrap;align-items:stretch;gap:.4rem;margin:1.6rem 0}
+.pipe .st{flex:1 1 118px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:.75rem .8rem;position:relative;min-width:0}
+.pipe .st .tag{font-family:var(--mono);font-size:.68rem;color:var(--accent);letter-spacing:.08em}
+.pipe .st .t{font-weight:600;font-size:.9rem;margin-top:.15rem}
+.pipe .st .d{font-size:.76rem;color:var(--ink2);line-height:1.55;margin-top:.2rem}
+.pipe .ar{align-self:center;color:var(--ink2);font-size:1rem;flex:0 0 auto}
+@media(max-width:640px){.pipe .ar{display:none}}
+
+/* ---------- callouts ---------- */
+.note,.warn,.bad{border-radius:var(--radius);padding:.85rem 1rem;margin:1.2rem 0;font-size:.9rem;border:1px solid}
+.note{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.warn{background:var(--warns);border-color:color-mix(in srgb,var(--warn) 35%,transparent);color:var(--ink)}
+.bad{background:var(--dangers);border-color:color-mix(in srgb,var(--danger) 32%,transparent)}
+.note .h,.warn .h,.bad .h{font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;
+  display:block;margin-bottom:.25rem}
+.note .h{color:var(--accent)} .warn .h{color:var(--warn)} .bad .h{color:var(--danger)}
+.note p:first-of-type,.warn p:first-of-type,.bad p:first-of-type{margin-top:0}
+.note p:last-child,.warn p:last-child,.bad p:last-child{margin-bottom:0}
+
+/* ---------- step cards ---------- */
+.step{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin:1rem 0;overflow:hidden}
+.step > .hd{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid var(--line);
+  background:color-mix(in srgb,var(--panel) 60%,var(--bg))}
+.step .id{font-family:var(--mono);font-size:.78rem;font-weight:700;padding:.1rem .45rem;border-radius:5px;
+  background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.step .tt{font-weight:650;font-size:.96rem;flex:1;min-width:0}
+.step .mk{font-family:var(--mono);font-size:.76rem;color:var(--ink2);white-space:nowrap}
+.step > .bd{padding:.3rem 1rem 1rem;font-size:.92rem}
+.step > .bd > p:first-child{margin-top:.6rem}
+.p1 .step .id{background:var(--p1s);color:var(--p1)} .p1 .step .mk{color:var(--p1)}
+.p2 .step .id{background:var(--p2s);color:var(--p2)} .p2 .step .mk{color:var(--p2)}
+.p3 .step .id{background:var(--p3s);color:var(--p3)} .p3 .step .mk{color:var(--p3)}
+
+/* ---------- part header ---------- */
+.part{display:flex;align-items:center;gap:1rem;padding:1rem 1.15rem;border-radius:var(--radius);
+  border:1px solid var(--line);margin-bottom:1.2rem}
+.part .big{font-family:var(--mono);font-size:1.9rem;font-weight:700;line-height:1}
+.part .tx{flex:1;min-width:0}
+.part .tx .t{font-weight:700;font-size:1.05rem}
+.part .tx .d{font-size:.83rem;color:var(--ink2)}
+.part.p1{background:var(--p1s);border-color:color-mix(in srgb,var(--p1) 30%,transparent)}
+.part.p1 .big{color:var(--p1)}
+.part.p2{background:var(--p2s);border-color:color-mix(in srgb,var(--p2) 30%,transparent)}
+.part.p2 .big{color:var(--p2)}
+.part.p3{background:var(--p3s);border-color:color-mix(in srgb,var(--p3) 30%,transparent)}
+.part.p3 .big{color:var(--p3)}
+
+/* ---------- code ---------- */
+code{font-family:var(--mono);font-size:.875em;background:color-mix(in srgb,var(--ink) 7%,transparent);
+  padding:.1em .35em;border-radius:4px}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.85rem 1rem;
+  overflow-x:auto;font-size:.83rem;line-height:1.6}
+pre code{background:none;padding:0;font-size:1em}
+.formula{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:.7rem 1rem;font-family:var(--mono);font-size:.86rem;margin:1rem 0;overflow-x:auto}
+
+/* ---------- table ---------- */
+.tw{overflow-x:auto;margin:1.1rem 0}
+table{border-collapse:collapse;width:100%;font-size:.87rem;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:color-mix(in srgb,var(--ink) 4%,var(--panel));font-weight:650;font-size:.79rem;
+  letter-spacing:.03em;color:var(--ink2);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+td.n{font-family:var(--mono);white-space:nowrap;text-align:right}
+
+/* ---------- rubric calculator ---------- */
+.calc{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.1rem;margin:1.2rem 0}
+.calc-head{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
+.calc-head .total{font-family:var(--mono);font-size:1.6rem;font-weight:700;line-height:1}
+.calc-head .total small{font-size:.8rem;color:var(--ink2);font-weight:400}
+.meter{flex:1 1 160px;min-width:120px;height:8px;border-radius:99px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.rgroup{margin-top:1.1rem}
+.rgroup .gh{display:flex;align-items:center;gap:.6rem;font-size:.8rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:.4rem}
+.rgroup .gh .gm{font-family:var(--mono);font-weight:400;text-transform:none;letter-spacing:0}
+label.ri{display:flex;gap:.6rem;align-items:flex-start;padding:.32rem .4rem;border-radius:7px;
+  font-size:.85rem;cursor:pointer;transition:background .12s}
+label.ri:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+label.ri input{margin:.42rem 0 0;accent-color:var(--accent);flex:0 0 auto;width:15px;height:15px}
+label.ri .s-fix{font-family:var(--mono);font-size:.72rem;color:var(--accent);background:var(--accent-soft);
+  padding:.05rem .35rem;border-radius:4px;margin-right:.3rem;white-space:nowrap}
+label.ri .pt{margin-left:auto;font-family:var(--mono);font-size:.78rem;color:var(--ink2);white-space:nowrap;padding-left:.5rem}
+label.ri input:checked ~ .txt{color:var(--ink2);text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink2) 40%,transparent)}
+label.ri input:checked ~ .pt{color:var(--p2);font-weight:700}
+
+/* ---------- details ---------- */
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;margin:.7rem 0}
+details summary{cursor:pointer;font-weight:600;font-size:.9rem;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";color:var(--accent);font-size:.85em}
+details[open] summary::before{content:"▾ "}
+details[open] summary{margin-bottom:.5rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+details .body{font-size:.88rem}
+
+/* ---------- figures ---------- */
+figure{margin:1.4rem 0}
+figure img{width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block}
+figcaption{font-size:.78rem;color:var(--ink2);margin-top:.45rem;text-align:center}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);margin-top:4rem;padding-top:1.4rem;font-size:.8rem;color:var(--ink2)}
+.kbd{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;
+  border-radius:5px;padding:.05rem .35rem;background:var(--panel)}
+
+@media print{
+  .top,nav.toc,#bar,.calc-head button,button.ghost{display:none!important}
+  .wrap{display:block;max-width:none;padding:0}
+  body{background:#fff;font-size:11pt}
+  .step,.calc,table,pre{break-inside:avoid}
+  a{color:#000;text-decoration:none}
+  details{border:none;padding:0} details>summary{display:none} details[open] .body,details .body{display:block!important}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<div class="top">
+  <div class="top-in">
+    <div class="brand">CIS341 · <span>作業二</span></div>
+    <div class="top-sp"></div>
+    <div class="count" id="cd">截止倒數 —</div>
+        <button class="ghost on" id="concise" title="隱藏長篇說明，只留步驟、評分表與實作順序">精簡模式</button>
+    <button class="ghost" id="print">列印</button>
+    <button class="ghost" id="theme">🌙</button>
+  </div>
+</div>
+
+<div class="wrap">
+<nav class="toc">
+  <ol>
+      <li><a href="#tldr">只看這一頁就夠</a></li>
+    <li><a href="#overview">總覽</a></li>
+    <li><a href="#why">為什麼不用訓練</a></li>
+    <li><a href="#setup">開始之前</a></li>
+    <li><a href="#part1">Part 1 · 零樣本分類</a></li>
+    <li><a href="#part2">Part 2 · 圖像檢索</a></li>
+    <li><a href="#part3">Part 3 · 分群</a></li>
+    <li><a href="#submit">繳交與揭露</a></li>
+    <li><a href="#rubric">評分表（互動）</a></li>
+    <li><a href="#pipeline">實作順序</a></li>
+    <li><a href="#appendix">附錄</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="kicker">CIS341 · Assignment 2</div>
+  <h1>使用 CLIP 進行零樣本學習</h1>
+  <p class="lede">用一個「已經看過四億張圖」的模型，在不訓練任何東西的前提下，把狗的照片分到 120 個犬種。
+  這份作業真正在測的不是你的模型，而是<strong>你寫的那 120 句英文</strong>。</p>
+  <div class="chips">
+    <span class="chip">總分 <b>100</b></span>
+    <span class="chip">模型 <b>ViT-B/32</b></span>
+    <span class="chip">資料 <b>20,580</b> 張 / <b>120</b> 犬種</span>
+    <span class="chip">子集 <b>1,440</b> 張</span>
+    <span class="chip">截止 <b>11-29 23:59</b> HKT</span>
+  </div>
+</header>
+
+<!-- ======================= TL;DR ======================= -->
+<div class="tldr" id="tldr">
+  <h2>只看這一頁就夠了</h2>
+  <p class="sub">做完這 8 步，就是 100 分。其他章節只是解釋「為什麼」。</p>
+  <ol class="acts">
+    <li><b>建環境</b><span class="why">開一個 venv，裝 torch / clip / gradio / scikit-learn。之後所有 cell 都用這個 kernel。</span>
+      <span class="out">可執行的 python</span></li>
+    <li><b>解壓 Stanford Dogs</b><span class="why">782 MB ZIP → 資料夾裡是 120 個犬種資料夾。放在本機磁碟，不要放雲端同步碟。</span>
+      <span class="out">data/n02xxxxxx-犬種/*.jpg</span></li>
+    <li><b>寫 3 個函式</b><span class="why"><code>encode_text()</code>、<code>encode_image()</code>、<code>predict_breed()</code>。全部 L2 正規化。</span>
+      <span class="out">1.3 完成</span></li>
+    <li><b>編碼全部照片，存檔</b><span class="why">20,580 張，每張只做一次。存成 <code>all_vecs.npz</code>，之後永遠載入。</span>
+      <span class="out">20580 × 512 向量</span></li>
+    <li><b>算三個數字</b><span class="why">一次 <code>img @ txt.T</code> → top-1、top-5、macro F1。要跑滿 20,580 張。</span>
+      <span class="out">1.5 的 25 分</span></li>
+    <li><b>換一句話，再算一次</b><span class="why">第二個模板 → 同一張表格比較 → 用你自己的話解釋為什麼會不同。</span>
+      <span class="out">1.6 的 10 分</span></li>
+    <li><b>做 3 個 Gradio 介面 + 截圖</b><span class="why">犬種分類、圖像檢索、群組探索器。截圖貼在程式碼旁邊。</span>
+      <span class="out">37 分</span></li>
+    <li><b>補 AI 揭露，交出去</b><span class="why">三段式：用什麼工具 / 解決什麼問題 / 你測試後有沒有效。Moodle 要按到「Submitted for grading」。</span>
+      <span class="out">避免扣 25 分</span></li>
+  </ol>
+  <div class="foot">
+    <strong>一句話版本：</strong>用 CLIP 把 120 句「a photo of a 犬種.」和 20,580 張照片都變成向量，
+    比對誰最像 → 那就是分類結果。之後換一句話再比一次，看差多少。
+    <br>按右上角「精簡模式」可切換要不要看長篇說明。
+  </div>
+</div>
+
+<!-- ======================= OVERVIEW ======================= -->
+<section id="overview">
+  <h2><span class="no">00</span>總覽：三個部分其實是一條資料流</h2>
+
+  <p>三個部分共用<strong>同一組影像向量</strong>。這代表：<strong>照片只編碼一次</strong>，
+  之後所有比較都是純矩陣運算。理解這點，整個作業的難度會下降一個量級。</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">60</div><div class="l">Part 1 · 零樣本分類</div></div>
+    <div class="stat"><div class="n">20</div><div class="l">Part 2 · 圖像檢索</div></div>
+    <div class="stat"><div class="n">20</div><div class="l">Part 3 · 分群</div></div>
+    <div class="stat"><div class="n">512</div><div class="l">每個向量的維度</div></div>
+  </div>
+
+  <div class="pipe">
+    <div class="st"><div class="tag">SETUP</div><div class="t">解壓 + 載入 CLIP</div>
+      <div class="d">782 MB ZIP 解到 Colab 本機磁碟，不要直接從 Drive 讀圖</div></div>
+    <div class="ar">→</div>
+    <div class="st"><div class="tag">ENCODE ×1</div><div class="t">編碼 20,580 張</div>
+      <div class="d">T4 上數分鐘。結果存成 <code>.npz</code> 放 Drive</div></div>
+    <div class="ar">→</div>
+    <div class="st" style="border-color:color-mix(in srgb,var(--p1) 40%,transparent);background:var(--p1s)">
+      <div class="tag" style="color:var(--p1)">PART 1</div><div class="t">文字 × 照片</div>
+      <div class="d">120 句 prompt ↔ 照片，算相似度做分類</div></div>
+    <div class="ar">→</div>
+    <div class="st" style="border-color:color-mix(in srgb,var(--p2) 40%,transparent);background:var(--p2s)">
+      <div class="tag" style="color:var(--p2)">PART 2</div><div class="t">照片 × 照片</div>
+      <div class="d">1,440 張子集裡找最像的 k 張</div></div>
+    <div class="ar">→</div>
+    <div class="st" style="border-color:color-mix(in srgb,var(--p3) 40%,transparent);background:var(--p3s)">
+      <div class="tag" style="color:var(--p3)">PART 3</div><div class="t">沒有查詢</div>
+      <div class="d">k-means 讓照片自己成群</div></div>
+  </div>
+
+  <div class="note">
+    <span class="h">貫穿全場的一句話</span>
+    <p>兩個 <strong>L2 正規化</strong>過的向量，內積 = 餘弦相似度。所以「比較」永遠只是
+    <code>image_vecs @ text_vecs.T</code> 這一行。</p>
+  </div>
+</section>
+
+<!-- ======================= WHY ======================= -->
+<section id="why" class="deep">
+  <h2><span class="no">01</span>為什麼「不訓練」也能分類</h2>
+
+  <p>Project 1 裡，每個天氣類別都要幾百張標註照片 + 一次訓練；新增類別就要重來一次。
+  CLIP 走的是另一條路：它同時讀「照片」和「照片的說明文字」，把兩者壓進<strong>同一個空間</strong>。
+  結果是——一張照片和一句描述它的話，會落在彼此附近。</p>
+
+  <figure>
+    <svg viewBox="0 0 620 250" role="img" aria-label="影像向量與文字向量在共享空間中的夾角示意圖" style="width:100%;max-width:620px;display:block;margin:0 auto">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g stroke="currentColor" stroke-opacity=".13">
+        <path d="M60 40 H580 M60 90 H580 M60 140 H580 M60 190 H580"/>
+        <path d="M120 20 V210 M200 20 V210 M280 20 V210 M360 20 V210 M440 20 V210 M520 20 V210"/>
+      </g>
+      <!-- axes -->
+      <line x1="60" y1="210" x2="60" y2="26" stroke="currentColor" stroke-opacity=".35" stroke-width="1"/>
+      <line x1="60" y1="210" x2="590" y2="210" stroke="currentColor" stroke-opacity=".35" stroke-width="1"/>
+      <text x="50" y="34" font-size="11" fill="currentColor" fill-opacity=".5" text-anchor="end">dim 2</text>
+      <text x="590" y="228" font-size="11" fill="currentColor" fill-opacity=".5" text-anchor="end">dim 1</text>
+      <!-- image vector -->
+      <line x1="60" y1="210" x2="330" y2="72" stroke="#3178c6" stroke-width="2.5" marker-end="url(#ah)" color="#3178c6"/>
+      <text x="340" y="66" font-size="13" font-weight="700" fill="#3178c6">影像向量</text>
+      <text x="340" y="83" font-size="10.5" fill="currentColor" fill-opacity=".55">這張照片</text>
+      <!-- text vector -->
+      <line x1="60" y1="210" x2="470" y2="140" stroke="#9333ea" stroke-width="2.5" marker-end="url(#ah)" color="#9333ea"/>
+      <text x="480" y="138" font-size="13" font-weight="700" fill="#9333ea">文字向量</text>
+      <text x="480" y="155" font-size="10.5" fill="currentColor" fill-opacity=".55">"a photo of a Chihuahua."</text>
+      <!-- angle arc -->
+      <path d="M118 194 A 72 72 0 0 0 152 176" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="3 3"/>
+      <text x="150" y="196" font-size="12" font-weight="700" fill="currentColor" fill-opacity=".7">θ</text>
+      <text x="176" y="200" font-size="11" fill="currentColor" fill-opacity=".55">cos θ 越大 → 越像</text>
+    </svg>
+    <figcaption>兩條向量都是單位長度，夾角 θ 的餘弦值就是相似度分數。</figcaption>
+  </figure>
+
+  <p>於是「分類」變成：<strong>為每個犬種寫一句話，看看哪一句與照片的夾角最小</strong>。
+  你從來沒有給模型看過這 120 個犬種的標註範例，所以叫 <strong>zero-shot</strong>。</p>
+
+  <div class="warn">
+    <span class="h">關鍵推論</span>
+    <p>CLIP 的權重<strong>完全不變</strong>。你能控制的只有那 120 句文字。
+    所以 Part 1 有一半分數，本質上是在評你的<strong>文字設計</strong>與<strong>實驗對照</strong>。</p>
+  </div>
+
+  <h3>為什麼犬種名稱不能直接丟進去</h3>
+  <p>CLIP 是從「人類寫給自己看的圖片說明」學的，它看到的句子長這樣：
+  <em>"a small brown dog sitting on a couch"</em>。
+  而 <code>silky_terrier</code> 對它來說長得像程式碼，不像語言。
+  把它包成一句話 <code>a photo of a silky terrier.</code>，就比較接近訓練時的文字分佈。</p>
+
+  <div class="note">
+    <span class="h">順帶一提</span>
+    <p>犬種名稱常有歧義。<code>Chihuahua</code> 也是墨西哥的一個州；
+    <code>Newfoundland</code>、<code>Pekinese</code> 同樣有多重意思。這是 Step 1.6 要你想的東西。</p>
+  </div>
+</section>
+
+<!-- ======================= SETUP ======================= -->
+<section id="setup">
+  <h2><span class="no">02</span>開始之前：本機環境（不是 Colab）</h2>
+
+    <p>你用本機 Jupyter，所以「Drive / <code>/content</code> / T4」那些都換成本機路徑。
+    你的機器是 <strong>GTX 1650 (4 GB)</strong>，跑 CLIP ViT-B/32 推論完全夠用。</p>
+
+  <div class="tw">
+  <table>
+      <thead><tr><th>Colab 寫法</th><th>你在本機要改成</th></tr></thead>
+    <tbody>
+        <tr><td><code>/content/drive/MyDrive/...</code></td><td><code>D:\cis341\assignment2\data\...</code>（或你放的位置）</td></tr>
+        <tr><td>上傳 ZIP 到 Drive</td><td>直接解壓到本機磁碟</td></tr>
+        <tr><td><code>!unzip</code></td><td><code>Expand-Archive</code>（PowerShell）或右鍵解壓</td></tr>
+        <tr><td>GPU runtime 選單</td><td>不用選，本機自動用 cuda</td></tr>
+        <tr><td>存向量到 Drive</td><td>存到同一個資料夾，加 <code>if not exists: load</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+    <h3>建議的 4 行安裝（在 assignment2 資料夾下）</h3>
+    <pre><code>py -3.12 -m venv .venv
+  .\.venv\Scripts\Activate.ps1
+  python -m pip install --upgrade pip
+  python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+  python -m pip install git+https://github.com/openai/CLIP.git gradio scikit-learn numpy pillow</code></pre>
+    <p style="font-size:.85rem;color:var(--ink2)">裝完後在 VS Code 右上角選 kernel → 選 <code>.venv</code> 的 python。</p>
+
+    <div class="note">
+      <span class="h">真的跑不動時的退路</span>
+      <p>如果 GPU 記憶體不足（4 GB 編碼時要小心 batch size），把 batch 設成 <code>32</code> 就好。
+      20,580 張在 1650 上大約 <strong>3–8 分鐘</strong>，比 Colab 慢但可以接受 —— 反正只做一次。</p>
+    </div>
+
+  <div class="bad">
+    <span class="h">不要做的事</span>
+      <p>① 不要把資料集放在 OneDrive／Google Drive 同步資料夾，逐檔讀取會被同步程式拖慢十倍。<br>
+      ② <code>train_list.txt</code> / <code>test_list.txt</code> <strong>完全不需要</strong> —— 零樣本分類沒有訓練，Part 1 直接分類全部照片。</p>
+  </div>
+
+    <h3>參考成績</h3>
+    <p><code>ViT-B/32</code> + 一個合理 prompt 大約 <strong>top-1 55–60%</strong>、<strong>top-5 85–90%</strong>。
+    <strong>分數不取決於是否超過它</strong>，但遠低於此通常代表有 bug。</p>
+</section>
+
+<!-- ======================= PART 1 ======================= -->
+<section id="part1" class="p1">
+  <h2><span class="no">03</span>Part 1 · 零樣本分類（60 分）</h2>
+
+  <div class="part p1">
+    <div class="big">1</div>
+    <div class="tx">
+      <div class="t">用文字描述類別，讓 CLIP 當裁判</div>
+      <div class="d">六個步驟：清單 → 模板 → 單張預測 → 介面 → 全量評估 → 兩模板對照</div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.1</span><span class="tt">犬種清單</span><span class="mk">5 分</span></div>
+    <div class="bd">
+      <p>資料夾名稱長這樣：<code>n02085620-Chihuahua</code>、<code>n02097658-silky_terrier</code>。
+      你要決定送進 CLIP 的文字是什麼 —— 去掉 ImageNet 編號、底線換成空白，就是
+      <em>silky terrier</em>。</p>
+      <div class="bad">
+        <span class="h">最容易全盤歸零的錯</span>
+        <p>真實標籤來自資料夾的<strong>排序</strong>。你清單的第 <code>i</code> 個犬種，必須對應答案裡標籤
+        <code>i</code>。順序錯了，<strong>所有準確率都是錯的，而且不會有任何報錯</strong>。</p>
+        <p>→ 用 <code>assert</code> 或並排列印，證明兩者一致。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.2</span><span class="tt">設計一組 prompt</span><span class="mk">5 分</span></div>
+    <div class="bd">
+      <p>選<strong>一個</strong>模板，套用到全部 120 個犬種。每個犬種恰好一句，沒有任何犬種被描述得比較有利。</p>
+      <div class="tw">
+      <table>
+        <thead><tr><th>犬種</th><th>Prompt</th></tr></thead>
+        <tbody>
+          <tr><td>Chihuahua</td><td><code>a photo of a Chihuahua.</code></td></tr>
+          <tr><td>silky terrier</td><td><code>a photo of a silky terrier.</code></td></tr>
+          <tr><td>Bernese mountain dog</td><td><code>a photo of a Bernese mountain dog.</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>要印出幾個範例，並<strong>說明你為什麼選這個模板</strong>（這句話值 2 分）。</p>
+      <details>
+        <summary>什麼樣的模板算好？</summary>
+        <div class="body">
+          <p>符合兩件事：① 適合<strong>全部 120 個</strong>犬種；② 接近「人寫的圖片說明」的文體。</p>
+          <p>反例：<code>A close-up of a {breed}</code> 不適合這些大多是生活照的圖；
+          <code>a photo of a large {breed}</code> 不適合 Chihuahua。混用模板會讓比較失去意義。</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.3</span><span class="tt">分類一張照片</span><span class="mk">10 分</span></div>
+    <div class="bd">
+      <p>實作 <code>predict_breed(image_path, k=5)</code>，回傳依序的 <code>(breed, score)</code> 清單。
+      <strong>助教評分時會用自己的照片呼叫它。</strong></p>
+      <ol>
+        <li>編碼 120 個 prompts → L2 正規化。<span style="color:var(--ink2)">（只做一次，放函式外）</span></li>
+        <li>開圖 → <code>convert("RGB")</code> → CLIP preprocess → 編碼 → 正規化</li>
+        <li>相似度 = 一次矩陣乘法</li>
+        <li>排序取 top-k；說明分數是<strong>餘弦相似度</strong>還是 <strong>softmax 機率</strong></li>
+      </ol>
+      <div class="warn">
+        <span class="h">2 分的細節</span>
+        <p>必須處理<strong>非 RGB</strong> 檔案（灰階 / RGBA / CMYK）。一行 <code>convert("RGB")</code> 就是這 2 分。</p>
+      </div>
+      <p>展示三張照片，每張標出真實犬種、預測結果，以及 top-1 / top-5 <strong>是否算正確</strong>。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.4</span><span class="tt">Gradio 犬種介面</span><span class="mk">5 分</span></div>
+    <div class="bd">
+      <p>把 <code>predict_breed</code> 包成介面：上傳照片 → <code>gr.Label</code> 顯示 top-5 與分數。</p>
+      <figure>
+        <img src="images/page4_img1.png" alt="犬種介面版面示意" loading="lazy">
+        <figcaption>助教設想的版面。你可以不同，只要照片與五個具名分數好讀。</figcaption>
+      </figure>
+      <p>測試素材：<strong>3 張資料集以外的狗</strong> + <strong>1 張不是狗的照片</strong>，
+      並解釋 CLIP 對後者做了什麼、為什麼。</p>
+      <div class="bad">
+        <span class="h">順序陷阱</span>
+        <p>介面用的是「1.6 最後選定的 prompt」。如果你先截圖、後改模板，<strong>截圖就與最終設定不符</strong>。
+        正確順序是：1.6 選定 → 回頭截圖。</p>
+      </div>
+      <details>
+        <summary>截圖小技巧</summary>
+        <div class="body"><p><code>launch()</code> 會印出公開連結。在新分頁打開，介面佔滿視窗，截圖清楚得多 ——
+        Colab 內嵌的框太窄。</p></div>
+      </details>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.5</span><span class="tt">全量評估（本作業最重的一步）</span><span class="mk">25 分</span></div>
+    <div class="bd">
+      <p>用你存好的向量，<strong>一次矩陣乘法</strong>分類全部 20,580 張（不要迴圈呼叫 20,580 次）。
+      報告三個數字：</p>
+      <div class="tw">
+      <table>
+        <thead><tr><th>指標</th><th>意思</th><th>要注意</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Top-1 準確率</strong></td><td>真實犬種排第一的比例</td><td rowspan="2">每張照片等重 → 照片多的犬種影響力較大（每犬種 148–252 張）</td></tr>
+          <tr><td><strong>Top-5 準確率</strong></td><td>真實犬種在前五名的比例</td></tr>
+          <tr><td><strong>Macro F1</strong></td><td>120 個犬種各算 F1，再取平均</td><td>每個犬種<strong>等重</strong>，能抓出「CLIP 只愛那幾個犬種」</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <div class="formula">precision = 正確預測為此犬種 ÷ 所有被預測為此犬種<br>
+recall&nbsp;&nbsp;&nbsp; = 此犬種被正確預測 ÷ 此犬種全部照片<br>
+F1 = 2 × precision × recall / (precision + recall)　　（分母為 0 時 F1 = 0）</div>
+
+      <p>可直接用 <code>f1_score(y_true, y_pred, average="macro", zero_division=0)</code>。</p>
+
+      <div class="bad">
+        <span class="h">拿不到分的情況</span>
+        <p>用子集測完就交出數字 → 此步驟 <strong>0 分</strong>。提交的數字必須來自<strong>全部 20,580 張</strong>。
+        另外「工作流程完整性與端到端可執行」另佔 7.5 分，所以程式碼要能一鍵重跑。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">1.6</span><span class="tt">比較兩個 prompt</span><span class="mk">10 分</span></div>
+    <div class="bd">
+      <p>換一個<strong>不一樣</strong>的模板，重跑 1.5 全量評估。兩組結果放進<strong>同一張表</strong>，然後選定介面要用哪一組。</p>
+      <div class="warn">
+        <span class="h">7 分裡有一半是「解釋」</span>
+        <p>要<strong>用你自己的話</strong>說明：CLIP 和照片都沒變，為什麼換句話說結果就變了？
+        提示兩個方向：① CLIP 訓練時看到的文字分佈；② 犬種名稱的其他意思。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PART 2 ======================= -->
+<section id="part2" class="p2">
+  <h2><span class="no">04</span>Part 2 · 圖像檢索（20 分）</h2>
+
+  <div class="part p2">
+    <div class="big">2</div>
+    <div class="tx">
+      <div class="t">把文字編碼器收起來，改用照片當查詢</div>
+      <div class="d">搜尋本身不使用任何犬種名稱；犬種只在事後當說明文字用</div>
+    </div>
+  </div>
+
+  <p>範圍是 <code>subset_list.txt</code> 的 <strong>1,440 張</strong>（每犬種 12 張）。
+  你在 Part 1 已經編碼過，這裡只要<strong>挑出來</strong>。</p>
+
+  <div class="step">
+    <div class="hd"><span class="id">2.1</span><span class="tt">以照片搜尋</span><span class="mk">8 分</span></div>
+    <div class="bd">
+      <p><code>find_similar(image_path, k=5)</code> → 回傳 <code>(path, breed, score)</code> 的清單。</p>
+      <p>編碼方式必須<strong>與 1.3 完全相同</strong>（同一個 preprocess、同樣正規化），否則分數不可比。</p>
+      <p>展示一張查詢，<strong>顯示最近的照片本體 + 犬種 + 分數</strong>，不要只印路徑。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">2.2</span><span class="tt">Gradio 檢索介面</span><span class="mk">8 分</span></div>
+    <div class="bd">
+      <p>輸入：照片上傳 + <code>k</code> 滑桿。<strong>同時</strong>顯示兩條路線的結果：</p>
+      <ul>
+        <li><code>gr.Label</code> ← <code>predict_breed</code> 的 top-5（<strong>文字路線</strong>）</li>
+        <li><code>gr.Gallery</code> ← <code>find_similar</code> 的 k 張最近照片，caption 為<strong>真實犬種</strong>（<strong>圖像路線</strong>）</li>
+      </ul>
+      <figure>
+        <img src="images/page6_img1.png" alt="檢索介面示意" loading="lazy">
+        <figcaption>兩條路線並排 —— 這是整個 Part 2 最有趣的地方。</figcaption>
+      </figure>
+      <div class="note">
+        <span class="h">怎麼讀這個介面</span>
+        <p><strong>caption 與預測一致</strong> → 文字與圖像兩條路殊途同歸。<br>
+        <strong>不一致</strong> → 別急著說「錯」，先看最近的照片<strong>共享了什麼</strong>：姿勢、毛色、背景、拍攝角度。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">2.3</span><span class="tt">測試搜尋</span><span class="mk">4 分</span></div>
+    <div class="bd">
+      <p>3 張不同的狗照片 × 2 個 <code>k</code> 值（例如 5 與 10）= <strong>6 張截圖</strong>。
+      每張下面寫 1–2 句：最近的照片是否與預測犬種一致。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= PART 3 ======================= -->
+<section id="part3" class="p3">
+  <h2><span class="no">05</span>Part 3 · 分群（20 分）</h2>
+
+  <div class="part p3">
+    <div class="big">3</div>
+    <div class="tx">
+      <div class="t">連問題都拿掉，看照片自己怎麼分</div>
+      <div class="d">這部分請暫時忘記犬種標籤 —— 重點是「你看到什麼」</div>
+    </div>
+  </div>
+
+  <p>k-means 在<strong>已正規化</strong>的向量上跑，等價於用餘弦相似度分群 —— 與 Part 1、2 同一個距離概念。</p>
+
+  <div class="step">
+    <div class="hd"><span class="id">3.1</span><span class="tt">形成群組</span><span class="mk">5 分</span></div>
+    <div class="bd">
+      <pre><code>KMeans(n_clusters=10, random_state=341, n_init=10).fit_predict(vectors)</code></pre>
+      <p>固定 <code>random_state</code> → 每次執行都得到同一組群。</p>
+      <p><strong>代表照片的選法：</strong>該群裡<strong>離自己群中心最近</strong>的那張。
+      群中心最近的照片不一定屬於該群，所以要在<strong>該群成員內部</strong>比較
+      （用 <code>KMeans.transform</code> 拿到距離矩陣，只取自己群的欄位）。</p>
+      <div class="note">
+        <span class="h">為什麼這樣選</span>
+        <p>群中心是「這個群的平均」→ 最靠近它的照片最能代表群的主題。
+        隨機挑一張可能挑到群裡的異類。</p>
+      </div>
+      <p>把這些步驟包成<strong>接受群組數量的函式</strong>（3.2 要呼叫它），並展示 10 群的
+      群組大小 + 代表照片。</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">3.2</span><span class="tt">群組探索器（三欄）</span><span class="mk">8 分</span></div>
+    <div class="bd">
+      <div class="tw">
+      <table>
+        <thead><tr><th>欄</th><th>內容</th><th>技術點</th></tr></thead>
+        <tbody>
+          <tr><td>左</td><td>群組數量滑桿（建議 10–50）+ 形成按鈕</td><td>—</td></tr>
+          <tr><td>中</td><td><code>gr.Gallery</code> 每群一張代表，caption = 群號 + 張數</td><td><code>allow_preview=False</code> → 點擊是<strong>選取</strong>而非放大</td></tr>
+          <tr><td>右</td><td><code>gr.Gallery</code> 該群<strong>全部</strong>照片</td><td><code>select</code> → <code>gr.SelectData.index</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>目前的群組要跨點擊保留 → <code>gr.State</code>。版面用 <code>gr.Row</code> / <code>gr.Column</code>。</p>
+      <figure>
+        <img src="images/page8_img1.png" alt="三欄群組探索器示意" loading="lazy">
+        <figcaption>三欄版面。Colab 內嵌視窗太窄會讓欄位換行，建議開公開連結截圖。</figcaption>
+      </figure>
+      <div class="warn">
+        <span class="h">這是本作業唯一「有挑戰性」的 UI</span>
+        <p>要把 <code>State</code>（目前的群組）與 <code>SelectData</code>（被點的是第幾張）接起來。
+        檢索實驗課兩者都用過，可以照抄骨架。重新分群在 1,440 張上只需幾秒。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="hd"><span class="id">3.3</span><span class="tt">找出主導群組</span><span class="mk">7 分</span></div>
+    <div class="bd">
+      <p>用兩種設定（例如 10 群 與 40 群），各貼一張「右欄已打開某一群」的截圖。然後描述：</p>
+      <ul>
+        <li>哪些群<strong>很大</strong>？</li>
+        <li>哪些群裡的照片<strong>看起來非常相似</strong>？</li>
+        <li>是什麼把每一群<strong>凝聚</strong>在一起 —— 毛色、顏色、姿勢、場景、還是照片裡的人？</li>
+      </ul>
+      <div class="bad">
+        <span class="h">明確扣分項</span>
+        <p><strong>請描述你看到的外觀，不要點名犬種。</strong>寫「一群淺色、短毛、坐姿的小型犬」比寫
+        「Chihuahua 群」更符合要求 —— 因為這部分的前提就是<strong>不看標籤</strong>。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SUBMIT ======================= -->
+<section id="submit">
+  <h2><span class="no">06</span>繳交、AI 揭露與時限</h2>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>項目</th><th>要求</th></tr></thead>
+    <tbody>
+      <tr><td>繳交物</td><td><strong>一個</strong>已執行的 <code>.ipynb</code>（含輸出），三個部分依序</td></tr>
+      <tr><td>說明位置</td><td>寫在它所討論的結果<strong>旁邊</strong></td></tr>
+      <tr><td>截圖位置</td><td>貼在<strong>建立該介面的程式碼旁</strong></td></tr>
+      <tr><td>不需要交</td><td>報告、影片、資料集、你存的向量</td></tr>
+      <tr><td>外部照片</td><td>要說明來源；第三方程式碼在使用的 cell 後<strong>立即引用</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>AI 揭露：三個部分都要寫</h3>
+  <p>允許使用 AI，但要說明：<strong>① 用哪個工具 ② 請它解決什麼具體問題 ③ 你測試後是否有效</strong>。
+  某部分沒用就明說。</p>
+  <div class="bad">
+    <span class="h">最高扣 25 個百分點</span>
+    <p>「使用 ChatGPT，協助撰寫程式」這種寫法<strong>不算揭露</strong>。
+    也不要聲稱你做過其實沒做的檢查。</p>
+  </div>
+
+  <div class="warn">
+    <span class="h">時限</span>
+    <p><strong>2026-11-29（日）23:59 香港時間</strong>。逾期每天扣 20%，最多五天。</p>
+    <p>Moodle 上必須按下「Submit assignment」並確認狀態是
+    <strong>Submitted for grading</strong> —— 停在草稿<strong>不算</strong>繳交。</p>
+  </div>
+
+  <h3>學術誠信</h3>
+  <p>必須<strong>個人獨立完成</strong>。抄襲與分享程式碼 → 零分，並進入紀律程序。</p>
+</section>
+
+<!-- ======================= RUBRIC ======================= -->
+<section id="rubric">
+  <h2><span class="no">07</span>評分表（可勾選，自動計分）</h2>
+  <p>勾選你已經完成的項目，總分會即時更新。<strong>勾選狀態存在瀏覽器本機</strong>，關掉再開仍在。</p>
+
+  <div class="calc">
+    <div class="calc-head">
+      <div class="total"><span id="score">0</span><small> / 100</small></div>
+      <div class="meter"><i id="meter"></i></div>
+      <button class="ghost" id="reset">重設</button>
+    </div>
+
+    <div class="rgroup">
+      <div class="gh">Part 1 · 零樣本分類 <span class="gm" data-group="p1">0 / 60</span></div>
+      <label class="ri"><input type="checkbox" data-mark="3"><span class="txt"><span class="s-fix">1.1</span>120 個可讀犬種名稱（來自資料夾或手打）</span><span class="pt">3</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.1</span>展示清單位置與標籤一致的檢查</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="3"><span class="txt"><span class="s-fix">1.2</span>一個模板套用於全部 120 犬種，並印出範例</span><span class="pt">3</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.2</span>說明選擇該模板的理由</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="6"><span class="txt"><span class="s-fix">1.3</span>正確的 CLIP 文字／影像前處理，並以餘弦相似度比較</span><span class="pt">6</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.3</span>predict_breed 依序回傳具名犬種與分數，且能處理非 RGB 檔</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.3</span>三個易讀範例，標示 top-1 / top-5 是否正確</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.4</span>可運作的介面，以 gr.Label 顯示 top-5</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">1.4</span>三張資料集外狗照片的截圖</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="1"><span class="txt"><span class="s-fix">1.4</span>一張沒有狗的照片，並對結果加註評論</span><span class="pt">1</span></label>
+      <label class="ri"><input type="checkbox" data-mark="7.5"><span class="txt"><span class="s-fix">1.5</span>全部照片上的 top-1 準確率正確</span><span class="pt">7.5</span></label>
+      <label class="ri"><input type="checkbox" data-mark="5"><span class="txt"><span class="s-fix">1.5</span>全部照片上的 top-5 準確率正確</span><span class="pt">5</span></label>
+      <label class="ri"><input type="checkbox" data-mark="5"><span class="txt"><span class="s-fix">1.5</span>全部照片上的 macro F1 正確</span><span class="pt">5</span></label>
+      <label class="ri"><input type="checkbox" data-mark="7.5"><span class="txt"><span class="s-fix">1.5</span>工作流程完整、評估程式碼可端到端重跑</span><span class="pt">7.5</span></label>
+      <label class="ri"><input type="checkbox" data-mark="3"><span class="txt"><span class="s-fix">1.6</span>另一組完整 120 個 prompt（不同模板），附範例</span><span class="pt">3</span></label>
+      <label class="ri"><input type="checkbox" data-mark="7"><span class="txt"><span class="s-fix">1.6</span>兩組的 top-1 / top-5 / macro F1 同表，並解釋差異原因</span><span class="pt">7</span></label>
+    </div>
+
+    <div class="rgroup">
+      <div class="gh">Part 2 · 圖像檢索 <span class="gm" data-group="p2">0 / 20</span></div>
+      <label class="ri"><input type="checkbox" data-mark="5"><span class="txt"><span class="s-fix">2.1</span>find_similar 以餘弦相似度比較，依序回傳具名結果</span><span class="pt">5</span></label>
+      <label class="ri"><input type="checkbox" data-mark="3"><span class="txt"><span class="s-fix">2.1</span>一個易讀範例，顯示最近的照片</span><span class="pt">3</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">2.2</span>含照片上傳與 k 滑桿的介面</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">2.2</span>以 gr.Label 顯示 top-5 預測犬種</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="4"><span class="txt"><span class="s-fix">2.2</span>k 張最近照片的藝廊，caption 為真實犬種</span><span class="pt">4</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">2.3</span>三張照片 × 兩種 k 的截圖（共 6 張）</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">2.3</span>每張截圖下方有簡短評論</span><span class="pt">2</span></label>
+    </div>
+
+    <div class="rgroup">
+      <div class="gh">Part 3 · 分群 <span class="gm" data-group="p3">0 / 20</span></div>
+      <label class="ri"><input type="checkbox" data-mark="3"><span class="txt"><span class="s-fix">3.1</span>在子集向量上以固定種子執行 k-means，包成可接受群數的函式</span><span class="pt">3</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">3.1</span>展示 10 群的群組大小與代表照片</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">3.2</span>三欄版面，左欄可設定群數</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">3.2</span>代表照片藝廊，caption 含群號與張數</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="4"><span class="txt"><span class="s-fix">3.2</span>選取代表照片會顯示該群全部照片</span><span class="pt">4</span></label>
+      <label class="ri"><input type="checkbox" data-mark="2"><span class="txt"><span class="s-fix">3.3</span>兩種設定的截圖，各打開一個群組</span><span class="pt">2</span></label>
+      <label class="ri"><input type="checkbox" data-mark="5"><span class="txt"><span class="s-fix">3.3</span>基於照片的主導群組描述（不點名犬種）</span><span class="pt">5</span></label>
+    </div>
+  </div>
+
+  <details>
+    <summary>附錄 A.2 · 缺失內容與無佐證的主張</summary>
+    <div class="body">
+      <ul>
+        <li>沒有已執行輸出的程式碼 → 只得該步驟的<strong>實作分數</strong>。</li>
+        <li>部分執行結果的數字 → 不算完整資料集的分數，即使程式碼能處理全部。</li>
+        <li>與你的輸出<strong>相矛盾</strong>的主張 → 該結果不給分。仔細測試但令人失望的結果<strong>仍得分</strong>。</li>
+        <li>評分只看 notebook 實際顯示的內容，不會對已反映在步驟中的缺失額外平扣。</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ======================= PIPELINE ======================= -->
+<section id="pipeline">
+  <h2><span class="no">08</span>建議的實作順序</h2>
+  <p>注意順序<strong>不完全是編號順序</strong>：1.5（評估）排在 1.4（介面）之前，
+  因為介面要用 1.6 選定的 prompt。</p>
+
+  <div class="tw">
+  <table>
+    <thead><tr><th>階段</th><th>內容</th><th>產出（給下一步用）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>Setup → 解壓 → 載入 CLIP</td><td>編碼函式</td></tr>
+      <tr><td><strong>B</strong></td><td>編碼全部照片 → 存 <code>all_vecs.npz</code></td><td>20,580 × 512 向量</td></tr>
+      <tr><td><strong>C</strong></td><td>篩出子集 → 存 <code>subset_vecs.npz</code></td><td>1,440 張向量 + 真實犬種</td></tr>
+      <tr><td><strong>D</strong></td><td>1.1 清單 + 對齊檢查</td><td><code>breeds[120]</code></td></tr>
+      <tr><td><strong>E</strong></td><td>1.2 模板 A → 文字向量 A</td><td><code>text_vecs_A</code></td></tr>
+      <tr><td><strong>F</strong></td><td>1.3 <code>predict_breed</code> + 三張測試</td><td>可重用函式</td></tr>
+      <tr><td><strong>G</strong></td><td>1.5 全量評估（A 組）</td><td>三個指標</td></tr>
+      <tr><td><strong>H</strong></td><td>1.6 模板 B → 評估（B 組）→ 選定</td><td>最終 prompt</td></tr>
+      <tr><td><strong>I</strong></td><td>1.4 介面 + 截圖<span style="color:var(--ink2)">（此時 prompt 已定案）</span></td><td>4 張截圖</td></tr>
+      <tr><td><strong>J</strong></td><td>2.1 → 2.2 → 2.3</td><td>6 張截圖</td></tr>
+      <tr><td><strong>K</strong></td><td>3.1 → 3.2 → 3.3</td><td>2 張截圖 + 描述</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <span class="h">檔案命名建議</span>
+    <p><code>all_vecs.npz</code>（<code>vectors</code>, <code>paths</code>）、
+    <code>subset_vecs.npz</code>（<code>vectors</code>, <code>paths</code>, <code>breeds</code>）。
+    全部存 <code>float32</code>，<strong>先正規化再存</strong>，之後就不用再處理。</p>
+  </div>
+</section>
+
+<!-- ======================= APPENDIX ======================= -->
+<section id="appendix" class="deep">
+  <h2><span class="no">09</span>附錄</h2>
+
+  <h3>資料集</h3>
+  <p>Stanford Dogs 由 Aditya Khosla、Nityananda Jayadevaprakash、Bangpeng Yao 與 Li Fei-Fei
+  以 ImageNet 影像與標註建立，論文為
+  <em>Novel Dataset for Fine-Grained Image Categorization</em>，
+  第一屆 Fine-Grained Visual Categorization 工作坊（CVPR 2011）。</p>
+
+  <figure>
+    <img src="images/page2_img1.png" alt="CLIP 共享嵌入空間示意" loading="lazy">
+    <figcaption>講義原圖：影像與文字被放進同一個空間，描述同一件事的配對彼此靠近。</figcaption>
+  </figure>
+
+  <h3>三份文件的關係</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>檔案</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>CIS341-Assignment2-2627.md</code></td><td>原文（英文）</td></tr>
+      <tr><td><code>CIS341-Assignment2-2627.zh-Hant.md</code></td><td>繁中對照</td></tr>
+      <tr><td><code>CIS341-Assignment2-workflow.md</code></td><td>mermaid 流程圖 + cell 順序表</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<footer>
+  <p>CIS341 Assignment 2 說明頁 · 依 <code>CIS341-Assignment2-2627.md</code> 整理。
+  所有分數與規範以原始作業文件為準。</p>
+</footer>
+
+</main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var LS = {
+    get:function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set:function(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  };
+
+  /* ---- theme ---- */
+  var root=document.documentElement, tb=document.getElementById('theme');
+  var saved=LS.get('cis341a2-theme');
+  if(saved==='dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)){
+    root.setAttribute('data-theme','dark'); tb.textContent='☀️';
+  }
+  tb.addEventListener('click',function(){
+    var dark = root.getAttribute('data-theme')==='dark';
+    if(dark){ root.removeAttribute('data-theme'); tb.textContent='🌙'; LS.set('cis341a2-theme','light'); }
+    else{ root.setAttribute('data-theme','dark'); tb.textContent='☀️'; LS.set('cis341a2-theme','dark'); }
+  });
+
+  document.getElementById('print').addEventListener('click',function(){ window.print(); });
+
+  /* ---- concise mode ---- */
+  var cb=document.getElementById('concise');
+  function applyConcise(on){
+    root.classList.toggle('concise', !!on);
+    cb.classList.toggle('on', !!on);
+    LS.set('cis341a2-concise', on?'1':'0');
+  }
+  var cs=LS.get('cis341a2-concise');
+  applyConcise(cs===null ? true : cs==='1');
+  cb.addEventListener('click',function(){ applyConcise(!root.classList.contains('concise')); });
+
+  /* 點了被精簡模式隱藏的章節 → 自動關閉精簡模式 */
+  document.querySelectorAll('nav.toc a').forEach(function(a){
+    a.addEventListener('click',function(){
+      var t=document.querySelector(a.getAttribute('href'));
+      if(t && t.classList.contains('deep') && root.classList.contains('concise')) applyConcise(false);
+    });
+  });
+
+    /* 精簡模式下點步驟標題可展開內容 */
+    document.querySelectorAll('.step > .hd').forEach(function(h){
+      h.addEventListener('click',function(){
+        if(!root.classList.contains('concise')) return;
+        h.parentNode.classList.toggle('open');
+      });
+    });
+
+  /* ---- reading progress ---- */
+  var bar=document.getElementById('bar');
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width = (max>0 ? (h.scrollTop/max*100) : 0) + '%';
+      spy();
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+
+  /* ---- scrollspy ---- */
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+    var secs=[].slice.call(document.querySelectorAll('main section[id], #tldr'));
+    function spy(){
+      var pos=window.scrollY+120, active=null;
+      for(var i=0;i<secs.length;i++){
+        if(secs[i].offsetParent===null) continue;
+        if(secs[i].offsetTop<=pos) active=secs[i].id;
+      }
+      if(!active){
+        for(var j=0;j<secs.length;j++){
+          if(secs[j].offsetParent!==null){ active=secs[j].id; break; }
+        }
+      }
+      links.forEach(function(a){
+        a.classList.toggle('on', a.getAttribute('href')==='#'+active);
+      });
+  }
+        onScroll();
+
+  /* ---- countdown ---- */
+  var dl=new Date('2026-11-29T23:59:00+08:00').getTime();
+  var el=document.getElementById('cd');
+  function tick(){
+    var d=dl-Date.now();
+    if(d<=0){ el.innerHTML='已過截止時間'; return; }
+    var s=Math.floor(d/1000);
+    var dd=Math.floor(s/86400), hh=Math.floor(s%86400/3600), mm=Math.floor(s%3600/60);
+    el.innerHTML='截止倒數 <b>'+dd+'天 '+String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+'</b>';
+  }
+  tick(); setInterval(tick,30000);
+
+  /* ---- rubric calculator ---- */
+  var boxes=[].slice.call(document.querySelectorAll('input[data-mark]'));
+  var scoreEl=document.getElementById('score'), meterEl=document.getElementById('meter');
+  var rowEls=[].slice.call(document.querySelectorAll('.rgroup'));
+    var groups={ p1:rowEls[0].querySelector('.gm'),
+                 p2:rowEls[1].querySelector('.gm'),
+                 p3:rowEls[2].querySelector('.gm') };
+  var gmax={p1:60,p2:20,p3:20};
+  var KEY='cis341a2-rubric';
+
+  function save(){
+    LS.set(KEY, boxes.map(function(b){ return b.checked?'1':'0'; }).join(''));
+  }
+  function load(){
+    var s=LS.get(KEY); if(!s || s.length!==boxes.length) return;
+    for(var i=0;i<boxes.length;i++){ boxes[i].checked = s[i]==='1'; }
+  }
+  function calc(){
+    var total=0, g={p1:0,p2:0,p3:0};
+      var keys=['p1','p2','p3'];
+    boxes.forEach(function(b){
+      if(!b.checked) return;
+      var v=parseFloat(b.dataset.mark)||0;
+      total+=v;
+        var idx=rowEls.indexOf(b.closest('.rgroup'));
+        if(idx>=0) g[keys[idx]]+=v;
+    });
+    scoreEl.textContent = (Math.round(total*10)/10).toString().replace(/\.0$/,'');
+    meterEl.style.width = total+'%';
+    meterEl.style.background = total>=80?'var(--p2)' : total>=50?'var(--p1)' : 'var(--accent)';
+    ['p1','p2','p3'].forEach(function(k){
+      var f=Math.round(g[k]*10)/10;
+      groups[k].textContent = (f.toString().replace(/\.0$/,'')) + ' / ' + gmax[k];
+    });
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',function(){ save(); calc(); }); });
+  document.getElementById('reset').addEventListener('click',function(){
+    boxes.forEach(function(b){ b.checked=false; }); save(); calc();
+  });
+  load(); calc();
+})();
+</script>
+</body>
+</html>

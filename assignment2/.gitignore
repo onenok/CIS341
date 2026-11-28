@@ -1,0 +1,12 @@
+# 資料集與向量快取不進版控：
+# StanfordDogs 解壓後 742 MB（20,580 張），原始 ZIP 746 MB，向量快取 24 MB。
+# 三者都超過 GitHub 單檔 100 MB 上限，且可由 Moodle 原檔 + 重跑 0.5 重建。
+data/StanfordDogs/
+data/cache/
+data/*.zip
+
+# 使用者自拍的舊截圖：已被 z_ipynb_image/ 下的成品取代，notebook 不引用
+z_ipynb_image/_old/
+
+# 執行產物
+outputs/
